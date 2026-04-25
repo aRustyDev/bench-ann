@@ -7,14 +7,17 @@
 ## In Scope
 
 ### Algorithms & Theory
-- Approximate Nearest Neighbor (ANN) algorithm families: HNSW, IVF, PQ, DiskANN/Vamana, random projection trees (Annoy), LSH, VP-trees, ball trees, graph-based (NSG, relative neighborhood graph)
+- Approximate Nearest Neighbor (ANN) algorithm families: HNSW, IVF, PQ, DiskANN/Vamana, random projection trees (Annoy), LSH, VP-trees, ball trees, graph-based (NSG, MRNG, relative neighborhood graph)
 - Exact kNN as baseline — understanding when exact becomes impractical
 - ScaNN and learned quantization approaches
+- **Modern quantization paradigms: RaBitQ (randomized binary quantization), TurboQuant/PolarQuant/QJL (data-oblivious quantization)** *(added Run 2 — these are fundamentally different from PQ and are being adopted in production; Rust implementations exist)*
 - Neural hashing and learning-to-hash methods
-- Vector indexing techniques and their composition (IVF+PQ, HNSW+PQ, etc.)
+- Vector indexing techniques and their composition (IVF+PQ, HNSW+PQ, IVF+RaBitQ, DiskANN+PQ, etc.)
 - Similarity/distance metrics: cosine, L2, dot product, Manhattan, Hamming, Jaccard, angular
-- Quantization techniques: scalar, product (PQ, OPQ), binary, learned (ScaNN)
+- Quantization techniques: scalar, product (PQ, OPQ), binary, randomized binary (RaBitQ), data-oblivious (TurboQuant), learned (ScaNN)
 - kNN ↔ ANN crossover analysis (scale, hardware, scenario thresholds)
+- **Filtered/constrained ANN search (FANNS): pre-filter, post-filter, in-filter approaches** *(added Run 2 — cross-cutting concern for all algorithm families; 3 Rust crates support it)*
+- **Dimensionality-dependent algorithm behavior: Hub Highway Hypothesis and qualitative behavioral shifts across dimensionality ranges** *(added Run 2)*
 
 ### Implementations
 - **Rust crates** implementing any of the above algorithms (primary focus)
@@ -26,12 +29,16 @@
   - Studied for architecture and design patterns, not for direct adoption
 
 ### Evaluation Dimensions
-- Performance: recall@k, QPS, build time, memory per vector, index size on disk
+- Performance: recall@k, QPS, build time, memory per vector, index size on disk, latency distribution (p50/p99)
 - Correctness: recall accuracy at various parameter settings
-- Scalability: behavior across dimensionalities (128d-1536d) and dataset sizes (10K-10M)
+- Scalability: behavior across dimensionalities (128d-1536d, with 3072d as stretch) and dataset sizes (10K-10M)
 - Code quality: unsafe usage, dependency count, API design, documentation
-- Maturity: maintenance status, community, production usage signals
+- Maturity: maintenance status, community, production usage signals, **maintenance risk** *(added Run 2 — hora's abandonment shows this is a real concern)*
 - Composability: how well components combine (e.g., using one crate's HNSW with another's quantization)
+- **Filtered search capability**: which crates support constrained/filtered ANN, which approach (pre/post/in-filter), and API quality *(added Run 2)*
+- **Incremental update capability**: insert/delete without full index rebuild, and its cost vs. rebuild *(added Run 2)*
+- **Persistence model**: mmap, LMDB, SSD-resident, serialization — and whether indexes survive process restart *(added Run 2)*
+- **Platform portability**: x86_64 vs. ARM64 support, SIMD dependency *(added Run 2 — rabitq-rs is x86_64-only)*
 
 ### Deployment Model Analysis
 - In-process library trade-off profiles
@@ -84,11 +91,12 @@ A non-Rust implementation is in scope if it:
 These assumptions scope the **primary focus** for Q3 (benchmarks) and Q4 (decision framework). Q1 (taxonomy), Q2 (crate survey), and Q6 (implementation landscape) survey broadly — including sparse vectors, all metrics, multi-threaded scenarios, and larger scales — even where benchmarks focus narrowly.
 
 - Embeddings are dense floating-point vectors (not sparse) — *Q1 may survey sparse/hybrid approaches for completeness*
-- Dimensionality range of interest: 128d to 1536d (covers common embedding models)
+- Dimensionality range of interest: 128d to 1536d, **with 3072d as stretch target** (frontier embedding models are pushing wider) *(expanded Run 2)*
 - Dataset sizes of interest: 10K to 10M vectors for benchmarks — *Q1/Q4 should discuss behavior at 100M+ from cited literature*
 - Primary distance metrics of interest: cosine, dot product, L2 — *Q1.b maps all metrics broadly*
 - Persistence is desirable but in-memory-only is acceptable for some use cases
 - Single-threaded query latency matters more than multi-tenant throughput for initial evaluation
+- **Filtered search is a first-class evaluation dimension**, not an optional nice-to-have *(added Run 2 — all production use cases need it)*
 
 ## Risks & Mitigations
 
@@ -104,3 +112,4 @@ These assumptions scope the **primary focus** for Q3 (benchmarks) and Q4 (decisi
 |------|--------|--------|
 | 2026-04-24 | Initial draft | aRustyDev + Claude |
 | 2026-04-24 | Added risks, reference impl rubric, clarified broad-vs-narrow assumptions per review | Claude |
+| 2026-04-24 | **Run 2 scope review**: Added modern quantization (RaBitQ, TurboQuant), filtered ANN, dimensionality-dependent behavior to Algorithms & Theory. Added 4 evaluation dimensions (filtered search, incremental updates, persistence model, platform portability). Expanded dimensionality assumption to 3072d stretch. Added maintenance risk and filtered search assumption. Rationale: Run 2 gap-fill discovered these as significant dimensions not covered by original scope — see Run 2 report for evidence. | Claude |

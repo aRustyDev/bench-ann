@@ -41,6 +41,39 @@ Beyond algorithm families, map the indexing layer: flat (brute-force), inverted 
 
 Understand: learning-to-hash approaches, how neural networks can learn hash functions for approximate search, relationship to LSH (handcrafted vs learned), deep hashing methods, and whether any Rust implementations exist.
 
+#### Q1.f: How does filtered/constrained ANN search work, and which implementations support it? *(added Run 2)*
+
+**Why**: Real applications almost always need "find nearest vectors WHERE attribute = X". Filtered ANN (FANNS) is a cross-cutting capability that any algorithm can support, but implementations vary drastically (pre-filter, post-filter, in-filter). Run 2 found 3 production Rust crates with in-filter support (hnsw_rs, usearch, arroy) and a dedicated survey paper (arXiv:2505.06501). This dimension was flagged as Open Question #2 in the original spec but never incorporated.
+
+**What "answered" looks like**: A comparison of filtering approaches (pre/post/in-filter) with trade-off profiles, which Rust crates support each, and how filter selectivity affects recall and throughput.
+
+**Seed references**:
+- [Survey of Filtered ANN Search (arXiv:2505.06501)](https://arxiv.org/abs/2505.06501)
+- [Filtered-DiskANN (Simhadri et al.)](https://harsha-simhadri.org/pubs/Filtered-DiskANN23.pdf)
+- [Window Filters for ANN (arXiv:2402.00943)](https://arxiv.org/abs/2402.00943)
+
+#### Q1.g: How do modern quantization methods (RaBitQ, TurboQuant) change the landscape? *(added Run 2)*
+
+**Why**: The original questions are PQ/ScaNN-centric (Q1.c). Run 2 discovered RaBitQ (arXiv:2405.12497, SIGMOD 2024) — a fundamentally different approach (random rotation + binary encoding, not subspace codebooks) with asymptotically optimal theoretical guarantees and zero codebook training cost. It's already in production at Elasticsearch, LanceDB, and Milvus. TurboQuant (Google, ICLR 2026) introduces data-oblivious quantization. These aren't PQ variants — they may obsolete classical PQ for many use cases. Rust implementations exist (rabitq-rs, turbo-quant, turbovec).
+
+**What "answered" looks like**: A comparison of quantization families (PQ vs. SQ vs. RaBitQ vs. TurboQuant vs. binary) with: mechanism, compression ratio, training requirements, theoretical guarantees, recall at equivalent compression, and Rust availability.
+
+**Seed references**:
+- [RaBitQ (arXiv:2405.12497)](https://arxiv.org/abs/2405.12497)
+- [Extended RaBitQ (arXiv:2409.09913)](https://arxiv.org/abs/2409.09913)
+- [RaBitQ Explainer — Elasticsearch Labs](https://www.elastic.co/search-labs/blog/rabitq-explainer-101)
+- [GPU IVF-RaBitQ (arXiv:2602.23999)](https://arxiv.org/abs/2602.23999)
+
+#### Q1.h: How does dimensionality affect algorithm behavior qualitatively? *(added Run 2)*
+
+**Why**: The Hub Highway Hypothesis (arXiv:2412.01940) demonstrates that flat NSW matches HNSW performance in high dimensions (>100d) because hub nodes naturally form navigable highways, making the hierarchy redundant. This means the answer to "which algorithm is best" changes qualitatively with dimensionality — not just in degree (slower) but in kind (different algorithm wins). Q4's decision framework must account for this.
+
+**What "answered" looks like**: A characterization of which algorithm families are dimensionality-sensitive vs. dimensionality-robust, with crossover points documented. Integrated into Q4 decision framework.
+
+**Seed references**:
+- [Hub Highway Hypothesis (arXiv:2412.01940)](https://arxiv.org/abs/2412.01940)
+- [Impacts of Data and Intrinsic Dimensionality on HNSW (arXiv:2405.17813)](https://arxiv.org/abs/2405.17813)
+
 ### Q2: Which Rust crates implement ANN algorithms, and what is their quality?
 
 **Why**: The Rust ecosystem for vector search is fragmented. Some crates are wrappers around C/C++ libraries (hnswlib-rs), some are pure Rust (Arroy), some are minimal (Fast Vector Similarity). We need a complete map before narrowing.
@@ -51,7 +84,7 @@ Understand: learning-to-hash approaches, how neural networks can learn hash func
 
 **Why**: Two HNSW implementations can differ drastically in performance due to implementation details (SIMD, memory layout, graph construction heuristics). Algorithm family alone isn't sufficient — implementation quality matters.
 
-**What "answered" looks like**: Benchmark data (measured, not inferred) comparing at least the top 3 candidates on: recall@10, QPS, build time, memory per vector, across multiple dimensionalities (128d, 384d, 768d, 1536d) and dataset sizes (10K, 100K, 1M).
+**What "answered" looks like**: Benchmark data (measured, not inferred) comparing at least the top 3 candidates on: recall@10, QPS, build time, memory per vector, across multiple dimensionalities (128d, 384d, 768d, 1536d) and dataset sizes (10K, 100K, 1M). Secondary dimensions: incremental update capability (insert/delete without rebuild), filtered ANN performance impact, and latency distribution (p50/p99). *(expanded Run 2)*
 
 ### Q4: What models and metrics determine "best fit" for a given project?
 
@@ -112,14 +145,17 @@ The following have been identified as starting points for R&E. Not curated — c
 
 ## Success Criteria
 
-- [ ] Algorithm taxonomy (Q1) is stable, complete, and includes sub-questions (Q1.a-e)
+- [ ] Algorithm taxonomy (Q1) is stable, complete, and includes sub-questions (Q1.a-h)
 - [ ] Similarity metric comparison (Q1.b) covers all common metrics with trade-off profiles
+- [ ] Filtered ANN approaches compared with Rust crate support matrix (Q1.f)
+- [ ] Modern quantization landscape mapped (RaBitQ, TurboQuant, PQ) with trade-off profiles (Q1.g)
+- [ ] Dimensionality-dependent algorithm behavior characterized (Q1.h)
 - [ ] Rust crate matrix (Q2) is comprehensive with maturity signals
-- [ ] At least 3 implementations have been benchmarked with measured data (Q3)
+- [ ] At least 3 implementations have been benchmarked with measured data (Q3), including incremental update and filtered search dimensions
 - [ ] Decision framework (Q4) is produced — not a decision, but a framework for making one
 - [ ] Deployment model trade-off profiles (Q5.a, Q5.b) are documented
 - [ ] Implementation survey (Q6.a) covers Rust + reference implementations in other languages
-- [ ] Implementation comparison (Q6.b) is grounded (verified features, not inferred)
+- [ ] Implementation comparison (Q6.b) is grounded (verified features, not inferred), including filtering and persistence capabilities
 - [ ] All findings are project-agnostic — reusable across any project
 
 ## Downstream Consumers (not part of this research)
@@ -151,10 +187,12 @@ Questions have implicit dependencies:
 
 ## Open Questions
 
-1. **Benchmark methodology**: What hardware? Standard datasets (SIFT1M, GloVe) or synthetic? Do published third-party benchmarks (ann-benchmarks.com) qualify as "measured" or only first-party runs?
-2. **Filtered ANN search**: Pre-filter vs post-filter vs in-filter approaches should be an explicit evaluation dimension — add to Q1 or Q6.b?
-3. **Sparse vectors**: SPLADE, BM25-as-vectors, hybrid dense+sparse are increasingly relevant. Currently excluded by assumption. Revisit after R&E Run 1?
-4. **Scale ceiling**: Q4 decision framework should discuss behavior at 100M+ vectors based on cited literature, even if not benchmarked first-party. How much depth?
+1. **Benchmark methodology**: Resolved in Run 2 (metrics.md). Hardware: Apple M-series or AMD Zen 4, single-core. Datasets: SIFT1M + synthetic at 384d/768d/1536d. ann-benchmarks.com data supplements but does not replace first-party runs. *(resolved Run 2)*
+2. **Filtered ANN search**: Resolved — promoted to Q1.f. Pre/post/in-filter comparison with Rust crate support matrix. *(resolved Run 2)*
+3. **Sparse vectors**: SPLADE, BM25-as-vectors, hybrid dense+sparse are increasingly relevant. Currently excluded by assumption. Revisit after R&E Run 1? *(still open — not addressed in Run 1/2)*
+4. **Scale ceiling**: Resolved in Run 2 (scoping.md). Q4 covers 10K-10M benchmarked, 100M+ from cited literature (DiskANN, DISTRIBUTEDANN). *(resolved Run 2)*
+5. **Platform portability**: rabitq-rs is x86_64-only (ARM64 has critical bugs). Should platform portability be an explicit evaluation dimension in Q6.b? *(added Run 2)*
+6. **Persistence mechanism diversity**: mmap vs. LMDB vs. SSD-resident vs. serialization varies significantly across crates. Should this be an explicit evaluation sub-dimension in Q5.a? *(added Run 2)*
 
 ## Non-Goals
 
@@ -170,3 +208,4 @@ Questions have implicit dependencies:
 | 2026-04-24 | Initial draft (Q1-Q6, success criteria, downstream consumers) | aRustyDev + Claude |
 | 2026-04-24 | Reframed Q4-Q6 to unbiased; added Q1.a-e sub-questions; added seed references | aRustyDev |
 | 2026-04-24 | Added execution order, risks, open questions per code review feedback | Claude |
+| 2026-04-24 | **Run 2 scope review**: Added Q1.f (filtered ANN), Q1.g (modern quantization), Q1.h (dimensionality-dependent behavior). Expanded Q3 to include incremental updates and filtered search. Updated success criteria for Q1.f-h coverage. Resolved open questions #1, #2, #4. Added open questions #5, #6. | Claude |
