@@ -1,202 +1,376 @@
-# Vector DS&A — Glossary (Initial Draft)
-# Status: draft (Run 1 — terms encountered, definitions brief)
+# Vector DS&A — Glossary
+# Status: refined (Run 2)
 # Last updated: 2026-04-24
-# Definitions will be refined with precise sources in Run 2
+# Definitions refined with key parameters, use cases, and precise sources
 
 terms:
-  # Core concepts
+  # === Core concepts ===
+
   - term: ANN
     full_name: "Approximate Nearest Neighbor"
     definition: "Finding a point p' such that distance(q, p') <= c * distance(q, p*) where p* is the true nearest neighbor and c >= 1 is the approximation factor."
+    use_cases: ["Recommendation systems", "semantic search", "image retrieval", "deduplication"]
+    related: [kNN, Recall@k]
     source: "arXiv:1806.09823"
     confidence: cited
 
   - term: kNN
     full_name: "k-Nearest Neighbors"
-    definition: "Exact search for the k closest points to a query in a dataset."
+    definition: "Exact search returning the k closest points to a query under a given distance metric. Guarantees correct results but scales linearly O(nd) with dataset size n and dimensionality d."
+    use_cases: ["Ground-truth baselines", "small datasets (<10k)", "low-dimensional exact search"]
+    related: [ANN]
     source: standard
     confidence: cited
 
   - term: "Recall@k"
-    definition: "Fraction of true k-nearest neighbors returned by an ANN algorithm. Primary quality metric."
+    definition: "Fraction of true k-nearest neighbors returned by an ANN algorithm. Computed as |ANN_result ∩ kNN_exact| / k. Values range 0.0–1.0. The primary quality metric for ANN algorithms."
+    key_params: {k: "Number of neighbors (typically 1, 10, or 100)"}
+    related: [ANN, QPS]
     source: "ann-benchmarks.com"
     confidence: cited
 
   - term: QPS
     full_name: "Queries Per Second"
-    definition: "Throughput metric measuring how many queries an ANN index can process per second."
+    definition: "Throughput metric: number of independent queries an ANN index processes per second on a single thread (or specified thread count). Measured at a fixed recall level for meaningful comparison."
+    related: [Recall@k, "latency"]
     source: standard
     confidence: cited
 
-  # Algorithm families
+  # === Graph-based algorithms ===
+
   - term: HNSW
     full_name: "Hierarchical Navigable Small World"
-    definition: "Graph-based ANN algorithm building multi-layer proximity graphs with skip-list-like hierarchy. Greedy search from top layer achieves logarithmic query complexity."
+    definition: "Graph-based ANN algorithm building multi-layer proximity graphs with skip-list-like hierarchy. Construction inserts each point into layer 0 and probabilistically into higher layers (probability 1/ln(M)). Search begins at the top layer, greedily descending while maintaining a beam of ef candidates. Achieves O(log n) query complexity with high recall."
+    key_params:
+      M: "Maximum connections per node (typical: 16–64). Higher M improves recall but increases memory."
+      ef_construction: "Beam width during construction (typical: 100–500). Higher improves graph quality."
+      ef_search: "Beam width during search (typical: 10–500). Primary recall/speed knob."
+    trade_offs: "Best in-memory recall/speed ratio. High memory overhead (~M * sizeof(id) per vector). Moderate build time O(n log n)."
+    use_cases: ["In-memory ANN up to ~100M vectors", "real-time serving", "multi-tenant vector search"]
     source: "arXiv:1603.09320"
     confidence: cited
 
   - term: NSW
     full_name: "Navigable Small World"
-    definition: "Single-layer small-world graph enabling greedy nearest neighbor search. Predecessor to HNSW."
-    source: "Malkov et al."
+    definition: "Single-layer small-world graph for greedy nearest neighbor search. Each node connects to its k-nearest neighbors plus long-range links formed during incremental insertion. Greedy search traverses edges toward the query. Predecessor to HNSW."
+    key_params:
+      connections: "Number of neighbors per node"
+    trade_offs: "Simpler than HNSW. The Hub Highway Hypothesis (arXiv:2412.01940) suggests that in high dimensions (>100d), NSW hub nodes naturally form 'highways' making the hierarchy unnecessary — flat NSW can match HNSW performance."
+    use_cases: ["Research baseline", "high-dimensional scenarios where HNSW hierarchy adds overhead without benefit"]
+    source: "Malkov et al. 2014"
     confidence: cited
 
-  - term: IVF
-    full_name: "Inverted File Index"
-    definition: "Partitions dataset into Voronoi cells via k-means clustering. At query time, searches only the nprobe nearest cells."
-    source: FAISS
+  - term: NSG
+    full_name: "Navigable Spreading-out Graph"
+    definition: "Sparse monotonic search graph with 'spread-out' neighbor selection: for each node, neighbors are chosen to maximize angular diversity while ensuring monotonic search paths exist. Achieves lower memory than HNSW with competitive recall by using a single-layer graph with guaranteed navigability."
+    key_params:
+      R: "Maximum out-degree (typical: 32–70)"
+      L: "Candidate pool size during construction"
+    trade_offs: "Lower memory than HNSW (sparser graph). Competitive recall but typically slower construction."
+    source: "Fu et al. (need full citation — Run 2 task)"
+    confidence: inferred
+
+  - term: SSG
+    full_name: "Satellite System Graph"
+    definition: "NSG variant using satellite-system-inspired neighbor selection: connects nodes to neighbors that are spread out like satellites around a central body, ensuring angular diversity. Generalizes NSG's RNG-based pruning."
+    trade_offs: "Improved angular diversity over NSG, particularly in clustered data distributions."
+    source: "Fu et al."
+    confidence: inferred
+
+  - term: Vamana
+    definition: "Graph construction algorithm used by DiskANN. Builds a single-layer graph with alpha-pruning for angular diversity (alpha > 1 favors long-range links). Uses a medoid as the entry point. Designed for SSD-resident indexes where the graph lives on disk and PQ-compressed vectors in RAM guide beam search."
+    key_params:
+      R: "Maximum out-degree (typical: 64–128)"
+      L: "Beam width during construction (typical: 100–200)"
+      alpha: "Pruning parameter (typical: 1.2). Higher values add more long-range edges."
+    trade_offs: "Very low memory (only PQ codes in RAM). Supports billion-scale on single node. Higher per-query latency than in-memory HNSW due to SSD I/O."
+    source: "Subramanya et al. NeurIPS 2019"
     confidence: cited
+
+  - term: DiskANN
+    definition: "Microsoft's disk-based ANN system using the Vamana graph on SSD with PQ-compressed vectors in memory. At query time, beam search uses PQ distances for candidate scoring, then fetches full vectors from SSD for re-ranking. Enables billion-scale search on a single node with ~1GB RAM."
+    key_params:
+      PQ_bytes: "Compressed vector size (typically dim/4 to dim/8 bytes)"
+      beam_width: "Number of candidate nodes fetched per I/O round"
+    trade_offs: "1000x less RAM than in-memory HNSW at billion scale. 2-10ms latency vs. sub-ms for in-memory. Build time is hours for billion-scale."
+    use_cases: ["Billion-scale search on commodity hardware", "cost-sensitive deployments"]
+    source: "Subramanya et al. NeurIPS 2019"
+    confidence: cited
+
+  - term: SPTAG
+    full_name: "Space Partition Tree And Graph"
+    definition: "Microsoft's ANN approach combining space partition trees (KD-tree or BKT) with a relative neighborhood graph (RNG). Trees provide fast entry points; graph provides fine-grained neighborhood refinement. Used in Bing for web-scale search."
+    trade_offs: "Good build/search parallelism. Less popular in research than HNSW/Vamana."
+    source: "github.com/microsoft/SPTAG"
+    confidence: cited
+
+  - term: EFANNA
+    full_name: "Extremely Fast ANN based on kNN Graph"
+    definition: "Constructs a k-nearest neighbor graph using a divide-and-conquer initialization (via hierarchical k-means) followed by NN-expansion refinement. The graph is then used for greedy search. Serves as a graph initialization strategy used by later methods like NSG."
+    trade_offs: "Fast graph construction. Graph quality depends on initialization quality."
+    source: "arXiv:1609.07228"
+    confidence: cited
+
+  # === Hash-based algorithms ===
+
+  - term: LSH
+    full_name: "Locality Sensitive Hashing"
+    definition: "Family of hash functions where Pr[h(x) = h(y)] is a monotonically increasing function of similarity(x, y). By hashing into L tables with k-bit codes, achieves sub-linear O(n^(1/c)) query time with provable approximation guarantees."
+    key_params:
+      k: "Number of hash bits per table (higher k = more selective, fewer candidates)"
+      L: "Number of hash tables (higher L = better recall, more memory)"
+    variants: ["Random hyperplane (cosine)", "Cross-polytope", "Multi-probe LSH", "p-stable (L2)"]
+    trade_offs: "Provable guarantees (unique among ANN methods). Sub-linear query. But requires many tables for high recall, leading to high memory. Typically dominated by graph methods in practice."
+    use_cases: ["When provable guarantees matter", "streaming/online settings", "near-duplicate detection"]
+    source: "Indyk & Motwani 1998; survey arXiv:2102.08942"
+    confidence: cited
+
+  - term: "Neural hashing"
+    full_name: "Neural / Deep Hashing"
+    definition: "Learns hash functions via neural networks trained on similarity labels. Data-dependent: learns hash codes tailored to the data distribution, achieving better recall per bit than data-independent LSH. Requires labeled training data."
+    variants: ["HashNet (continuation-based)", "Deep Supervised Hashing", "Hadamard Codebook Hashing"]
+    trade_offs: "Better recall/bit than LSH for same code length. Requires training data and GPU. Weaker or no theoretical guarantees. Primarily researched in image retrieval."
+    use_cases: ["Image retrieval", "cross-modal search"]
+    source: "Survey arXiv:2003.03369"
+    confidence: cited
+
+  # === Quantization-based ===
 
   - term: PQ
     full_name: "Product Quantization"
-    definition: "Compression technique that splits vectors into M sub-vectors and quantizes each via a learned codebook of ksub centroids. Enables asymmetric distance computation."
-    source: "Jégou et al. 2011"
+    definition: "Splits a d-dimensional vector into M sub-vectors of d/M dimensions each. Each sub-vector is quantized to the nearest centroid in a learned codebook of ksub entries. Distances are computed via precomputed lookup tables (asymmetric distance computation). Compresses each vector to M * log2(ksub) bits."
+    key_params:
+      M: "Number of sub-quantizers (typical: 8–64)"
+      ksub: "Centroids per sub-quantizer (typical: 256, giving 8 bits per sub-vector)"
+    trade_offs: "Extreme compression (e.g., 128d float32 → 16 bytes with M=16, ksub=256). Fast distance via lookup tables. Moderate recall loss. Training requires representative sample."
+    use_cases: ["Billion-scale search (with IVF)", "memory-constrained environments", "re-ranking candidates"]
+    source: "Jégou et al. 2011 (IEEE TPAMI)"
     confidence: cited
 
   - term: OPQ
     full_name: "Optimized Product Quantization"
-    definition: "PQ with a learned rotation matrix applied before quantization to align data variance with subspace boundaries, reducing quantization error."
-    source: FAISS
+    definition: "Learns an orthogonal rotation matrix R applied before PQ quantization. The rotation aligns the principal variance directions of the data with PQ subspace boundaries, minimizing quantization error. Iteratively optimizes R and the codebooks."
+    trade_offs: "5-15% recall improvement over PQ at the same compression ratio. Slower training due to rotation optimization."
+    source: "Ge et al. 2013; FAISS"
     confidence: cited
 
   - term: ScaNN
     full_name: "Scalable Nearest Neighbors"
-    definition: "Google's ANN system using learned anisotropic vector quantization that weights quantization error directionally based on query distribution."
+    definition: "Google's ANN system using learned anisotropic vector quantization. Unlike PQ which minimizes reconstruction error uniformly, ScaNN weights quantization error directionally: errors parallel to the query direction are penalized more heavily than perpendicular errors, since parallel errors affect inner product computation more. Extended by SOAR (Spilling with Orthogonality-Amplified Residuals) for improved index quality."
+    key_params:
+      num_leaves: "Number of partitions (similar to IVF nlist)"
+      reordering_num_neighbors: "Candidates to re-rank with exact distances"
+    trade_offs: "State-of-the-art throughput/recall on ann-benchmarks. Complex tuning. Not available in Rust."
     source: "arXiv:1908.10396"
     confidence: cited
 
   - term: SOAR
     full_name: "Spilling with Orthogonality-Amplified Residuals"
-    definition: "Extension to ScaNN's indexing that adds redundant representations optimized to compensate for each other's weaknesses via orthogonality-amplified residual loss."
+    definition: "Extension to ScaNN's indexing that adds redundant representations ('spilling') to compensate for quantization boundary effects. Representations are optimized via an orthogonality-amplified residual loss that ensures the spilled copies compensate for each other's weaknesses."
+    trade_offs: "Improves ScaNN recall at minimal throughput cost."
     source: "arXiv:2404.00774"
     confidence: cited
 
-  - term: DiskANN
-    definition: "Microsoft's disk-based ANN system using the Vamana graph algorithm stored on SSD with PQ-compressed vectors in memory. Enables billion-scale search on single node."
-    source: "Subramanya et al. NeurIPS 2019"
-    confidence: cited
-
-  - term: Vamana
-    definition: "Graph construction algorithm used by DiskANN. Builds a single-layer graph with angular diversity pruning and medoid starting point."
-    source: "Subramanya et al. NeurIPS 2019"
-    confidence: cited
-
-  - term: LSH
-    full_name: "Locality Sensitive Hashing"
-    definition: "Family of hash functions that map similar items to the same bucket with high probability. Provides sub-linear query time with theoretical guarantees."
-    source: "Indyk & Motwani 1998; survey arXiv:2102.08942"
-    confidence: cited
-
-  - term: NSG
-    full_name: "Navigable Spreading-out Graph"
-    definition: "Sparse monotonic search graph where neighbors are selected to be 'spread out' for maximum navigability."
-    source: "Fu et al."
-    confidence: inferred
-
-  - term: SPTAG
-    full_name: "Space Partition Tree And Graph"
-    definition: "Microsoft's ANN approach combining partition trees (KD-tree or BKT) with a relative neighborhood graph."
-    source: "github.com/microsoft/SPTAG"
-    confidence: cited
-
-  - term: RPT
-    full_name: "Random Projection Trees"
-    definition: "Forest of binary trees where each split is defined by a random hyperplane. Annoy uses this approach."
-    source: "Bernhardsson 2015"
-    confidence: cited
-
-  # Distance metrics
-  - term: "Cosine similarity"
-    definition: "Measures angle between vectors: dot(a,b)/(||a||*||b||). Range [-1,1]. Invariant to vector magnitude."
-    source: standard
-    confidence: cited
-
-  - term: "Euclidean distance (L2)"
-    definition: "sqrt(sum((a_i - b_i)^2)). Measures geometric distance. Most intuitive distance metric."
-    source: standard
-    confidence: cited
-
-  - term: "Dot product / Inner product"
-    definition: "sum(a_i * b_i). Sensitive to both angle and magnitude. Equivalent to cosine for normalized vectors."
-    source: standard
-    confidence: cited
-
-  - term: "Manhattan distance (L1)"
-    definition: "sum(|a_i - b_i|). Sum of absolute differences. Less sensitive to outlier dimensions than L2."
-    source: standard
-    confidence: cited
-
-  - term: "Hamming distance"
-    definition: "Number of positions where binary vectors differ. Used for binary codes and quantized representations."
-    source: standard
-    confidence: cited
-
-  - term: "Angular distance"
-    definition: "arccos(cosine_similarity) / pi. Normalized angle between vectors, range [0,1]."
-    source: standard
-    confidence: cited
-
-  # Quantization terms
   - term: "Scalar quantization"
-    definition: "Quantize each dimension independently from float32 to int8/int4. Simple 4x compression at int8."
+    full_name: "Scalar Quantization (SQ)"
+    definition: "Quantizes each dimension independently: maps the floating-point range [min, max] per dimension to integer values (int8, int4, etc.). For int8: 4x compression, for int4: 8x. Distance computation uses integer arithmetic or dequantized floats."
+    trade_offs: "Simple implementation. 4x compression at int8 with minimal recall loss (<1% typically). Additive with other compression (e.g., SQ + PQ residuals)."
+    use_cases: ["Production vector databases (qdrant, milvus)", "reducing memory without algorithmic complexity"]
     source: standard
     confidence: cited
 
   - term: "Binary quantization"
-    definition: "Reduce each dimension to 1 bit (sign of value). 32x compression. Used for fast Hamming-based candidate filtering."
+    definition: "Reduces each dimension to 1 bit (sign of the value). 32x compression from float32. Enables Hamming distance for extremely fast candidate filtering. Typically used as a first-pass filter with full-precision re-ranking."
+    trade_offs: "32x compression, 10-100x faster candidate filtering. Significant recall loss without re-ranking (30-50% recall drop). Works best with high-dimensional models (>768d) where each bit carries less information loss."
+    use_cases: ["Fast candidate pre-filtering", "memory-constrained environments with re-ranking budget"]
     source: standard
     confidence: cited
 
   - term: "Anisotropic quantization"
-    definition: "Directionally-dependent quantization loss that penalizes error more in directions aligned with the query. Key innovation of ScaNN."
+    definition: "Quantization where error is weighted directionally. Errors parallel to the expected query direction are penalized more than perpendicular errors, since they affect similarity computation more. Key innovation of ScaNN."
     source: "arXiv:1908.10396"
     confidence: cited
 
   - term: RaBitQ
-    definition: "Recent quantization method achieving asymptotically optimal space/error trade-off by extending scalar quantization with theoretical guarantees."
+    definition: "Quantization method achieving asymptotically optimal space/error trade-off. Extends binary quantization with randomized rounding and unbiased distance estimators. Provides theoretical guarantees that match information-theoretic lower bounds for the quantization-error trade-off."
+    trade_offs: "Best theoretical guarantees among quantization methods. Practical performance competitive with or exceeding PQ. Relatively new (2024), limited ecosystem support."
     source: "arXiv:2409.09913"
     confidence: cited
 
-  # Index terms
+  # === Tree-based algorithms ===
+
+  - term: RPT
+    full_name: "Random Projection Trees"
+    definition: "Forest of binary trees where each internal node splits data by a random hyperplane (defined by two randomly chosen points). At query time, all trees are traversed, producing a priority queue of candidate leaf nodes. Candidates are merged and re-ranked. Used by Spotify's Annoy."
+    key_params:
+      n_trees: "Number of trees in the forest (typical: 10–100). More trees = better recall, more memory."
+      search_k: "Maximum number of candidates to inspect across all trees (typical: n_trees * k to n_trees * 100)"
+    trade_offs: "Immutable index (build-once, query-many). Good for medium-scale (~1-10M). Memory-mapped indexes. Moderate recall compared to graph methods."
+    use_cases: ["Offline index building", "static datasets", "Spotify-style recommendation"]
+    source: "Bernhardsson 2015 (Spotify)"
+    confidence: cited
+
+  - term: KD_tree
+    full_name: "KD-tree"
+    definition: "Classic binary space partition tree. Each internal node splits data along a coordinate axis (cycling through dimensions or choosing the highest-variance axis). Exact NN in low dimensions. Performance degrades exponentially with dimensionality (curse of dimensionality) — typically effective only below ~20 dimensions."
+    key_params:
+      leaf_size: "Maximum points per leaf (typical: 10–40)"
+    trade_offs: "Exact NN in low-d. O(log n) query for low-d, but degrades to O(n) in high-d. Fast build O(n log n)."
+    use_cases: ["Spatial indexing (<20d)", "computational geometry", "point cloud processing"]
+    source: "Bentley 1975"
+    confidence: cited
+
+  - term: "Ball tree"
+    full_name: "Ball Tree"
+    definition: "Partitions space using nested hyperspheres. Each node defines a ball (center + radius) containing all descendant points. Prunes search branches when query-to-ball-center distance minus radius exceeds current best distance. Slightly more robust than KD-tree in moderate dimensions (~20-50d)."
+    trade_offs: "Better than KD-tree in moderate-d. Still suffers from curse of dimensionality above ~50d."
+    source: "Omohundro 1989"
+    confidence: cited
+
+  - term: VP_tree
+    full_name: "Vantage Point Tree"
+    definition: "Metric tree: chooses a 'vantage point' and partitions data by distance from it (inside/outside a radius). Works with any metric (not just Euclidean). Effective when the metric is expensive to compute and triangle inequality pruning helps."
+    trade_offs: "Metric-agnostic. Effective for custom metrics. Similar curse-of-dimensionality limitations."
+    use_cases: ["Custom metric spaces", "edit distance on strings", "metric learning"]
+    source: "Yianilos 1993"
+    confidence: cited
+
+  - term: MRPT
+    full_name: "Multi-Resolution Projection Trees"
+    definition: "Ensemble of random projection trees at multiple resolutions with automatic parameter tuning. Each tree uses a different projection depth, providing multi-scale partitioning. Auto-tunes the vote threshold for a target recall level."
+    trade_offs: "Auto-tuning is convenient. Moderate recall. Research-stage, limited production use."
+    source: "Hyvönen et al. 2016"
+    confidence: inferred
+
+  # === Partition-based (Inverted Index) ===
+
+  - term: IVF
+    full_name: "Inverted File Index"
+    definition: "Partitions the dataset into nlist Voronoi cells via k-means clustering on the vectors. Each cell stores a posting list of its member vectors. At query time, the nprobe nearest centroids are identified and their posting lists are scanned exhaustively. Often combined with PQ for compressed storage."
+    key_params:
+      nlist: "Number of partitions (typical: sqrt(n) to 4*sqrt(n))"
+      nprobe: "Partitions searched at query time (typical: 1–128). Primary recall/speed knob."
+    trade_offs: "Scales well with dataset size. Training cost (k-means). Recall depends on cluster quality and nprobe."
+    use_cases: ["Large-scale search (>10M vectors)", "combined with PQ for billion-scale"]
+    source: "FAISS; Jégou et al. 2011"
+    confidence: cited
+
+  - term: IVF_PQ
+    full_name: "IVF + Product Quantization"
+    definition: "Standard billion-scale approach: IVF provides coarse partitioning, PQ compresses residual vectors within each partition. Asymmetric distance computation on PQ codes enables fast scanning of posting lists."
+    trade_offs: "The workhorse of billion-scale ANN. Memory: ~(M * log2(ksub)/8 + sizeof(id)) bytes per vector. Requires two-stage training (k-means + PQ codebooks)."
+    source: "FAISS"
+    confidence: cited
+
+  - term: IVF_HNSW
+    full_name: "IVF + HNSW coarse quantizer"
+    definition: "Replaces the flat centroid search in IVF with an HNSW index over centroids. Reduces probe assignment from O(nlist) to O(log(nlist))."
+    trade_offs: "Faster probe assignment for large nlist. Additional memory for HNSW graph over centroids."
+    source: "FAISS"
+    confidence: cited
+
+  # === Distance metrics ===
+
+  - term: "Cosine similarity"
+    definition: "Measures angle between vectors: cos(θ) = dot(a,b)/(||a||*||b||). Range [-1,1] (or [0,1] for non-negative vectors). Invariant to vector magnitude — only direction matters."
+    use_cases: ["NLP embeddings (most common)", "document similarity", "recommendation"]
+    notes: "Equivalent to dot product on L2-normalized vectors. Many ANN libraries implement cosine via pre-normalization + inner product."
+    source: standard
+    confidence: cited
+
+  - term: "Euclidean distance (L2)"
+    definition: "sqrt(sum((a_i - b_i)^2)). Measures geometric distance in Euclidean space. Most ANN libraries use squared L2 internally to avoid the sqrt."
+    use_cases: ["Image features", "general-purpose when magnitude matters", "clustering"]
+    source: standard
+    confidence: cited
+
+  - term: "Dot product / Inner product"
+    definition: "sum(a_i * b_i). Sensitive to both angle and magnitude. Equivalent to cosine similarity for L2-normalized vectors. Maximized by Maximum Inner Product Search (MIPS)."
+    use_cases: ["MIPS problems", "recommendation with magnitude-weighted preferences"]
+    source: standard
+    confidence: cited
+
+  - term: "Manhattan distance (L1)"
+    definition: "sum(|a_i - b_i|). Sum of absolute differences per dimension. Less sensitive to outlier dimensions than L2."
+    use_cases: ["Sparse data", "when outlier dimensions should not dominate"]
+    source: standard
+    confidence: cited
+
+  - term: "Hamming distance"
+    definition: "Number of positions where binary vectors differ. Computed via XOR + popcount. Extremely fast on modern CPUs."
+    use_cases: ["Binary codes from hashing", "binary quantization candidate filtering", "DNA sequence matching"]
+    source: standard
+    confidence: cited
+
+  - term: "Angular distance"
+    definition: "arccos(cosine_similarity) / π. Normalized angle between vectors, range [0,1]. A true metric (satisfies triangle inequality), unlike cosine similarity."
+    source: standard
+    confidence: cited
+
+  # === Index parameters ===
+
   - term: "nprobe"
-    definition: "Number of IVF partitions searched at query time. Higher nprobe = better recall but slower."
+    definition: "Number of IVF partitions searched at query time. Higher nprobe = better recall, lower throughput. Typical range: 1 (fastest) to nlist/10 (highest recall)."
     source: FAISS
     confidence: cited
 
   - term: "ef_search"
-    definition: "HNSW beam width during search. Controls recall/speed trade-off."
+    definition: "HNSW beam width during search. Size of the dynamic candidate list maintained during greedy traversal. Higher ef_search explores more candidates = better recall, slower queries. Must be >= k (number of neighbors requested)."
     source: "arXiv:1603.09320"
     confidence: cited
 
   - term: "ef_construction"
-    definition: "HNSW beam width during index construction. Higher = better graph quality but slower build."
+    definition: "HNSW beam width during index construction. Controls how thoroughly the algorithm searches for neighbors when inserting each point. Higher values produce a better-connected graph but take longer to build."
     source: "arXiv:1603.09320"
     confidence: cited
 
   - term: M
-    definition: "Maximum number of connections per node in HNSW graph. Higher M = better recall, more memory."
+    definition: "Maximum number of bidirectional connections per node in an HNSW graph. Layer 0 allows 2*M connections. Higher M = better recall and connectivity, but more memory (each connection stores a node ID + optionally a distance)."
     source: "arXiv:1603.09320"
     confidence: cited
 
-  # Filtered ANN
+  # === Filtered ANN ===
+
   - term: FANNS
     full_name: "Filtered Approximate Nearest Neighbor Search"
-    definition: "ANN search with scalar attribute constraints. Three approaches: pre-filter (filter then search), post-filter (search then filter), in-filter (interleave)."
+    definition: "ANN search with scalar attribute constraints (e.g., 'find nearest vectors WHERE category = X AND date > Y'). Three main approaches: pre-filter (filter dataset, then ANN on filtered subset), post-filter (ANN on full dataset, discard non-matching), in-filter (integrate filter checks into graph/index traversal)."
+    trade_offs: "Pre-filter: low recall when filter is very selective. Post-filter: wastes work scanning non-matching candidates. In-filter: best quality but requires algorithm-level integration."
+    use_cases: ["Multi-tenant vector search", "e-commerce with category constraints", "temporal filtering"]
     source: "arXiv:2505.06501"
     confidence: cited
 
-  # Benchmarking
+  # === Benchmarking ===
+
   - term: SIFT1M
-    definition: "Standard benchmark dataset: 1 million 128-dimensional SIFT feature vectors. Most commonly used ANN benchmark."
-    source: "ann-benchmarks.com"
+    definition: "Standard benchmark dataset: 1 million 128-dimensional SIFT feature vectors extracted from images. 10,000 query vectors. Ground-truth exact k-NN provided. The most widely used ANN benchmark dataset."
+    notes: "128d is relatively low by modern embedding standards (768d, 1536d). Results on SIFT1M may not transfer to higher dimensions."
+    source: "ann-benchmarks.com; Jégou et al. 2011"
     confidence: cited
 
   - term: GloVe
-    definition: "Global Vectors for Word Representation. GloVe-100 (100d) used as ANN benchmark dataset."
+    definition: "Global Vectors for Word Representation. GloVe-100 (100d, ~1.2M vectors) used as ANN benchmark. Angular distance is the natural metric for word embeddings."
+    source: "Pennington et al. 2014; ann-benchmarks.com"
+    confidence: cited
+
+  - term: "GIST"
+    definition: "GIST-960: 1 million 960-dimensional image descriptors. Used as a high-dimensional ANN benchmark where methods that work well on SIFT1M may struggle."
     source: "ann-benchmarks.com"
     confidence: cited
 
   - term: ann-benchmarks
-    definition: "Standard benchmarking framework for ANN algorithms by Aumüller et al. Provides reproducible comparisons."
-    source: "arXiv:1807.05614"
+    definition: "Standard benchmarking framework for ANN algorithms by Aumüller et al. Provides reproducible comparisons using Docker containers, standardized datasets, and consistent hardware. Reports recall vs. QPS Pareto frontiers."
+    source: "arXiv:1807.05614; ann-benchmarks.com"
+    confidence: cited
+
+  # === Composite patterns (not standalone algorithms) ===
+
+  - term: "HNSW+PQ"
+    definition: "Composite approach: HNSW graph for navigation with PQ-compressed vector storage. Graph traversal uses PQ distances for candidate scoring, optionally re-ranking top candidates with full precision. Reduces memory vs. full-precision HNSW."
+    use_cases: ["Memory-constrained HNSW deployments"]
+    source: "FAISS; Qdrant"
+    confidence: cited
+
+  - term: "IVF+HNSW+PQ"
+    definition: "Three-level composite: HNSW for fast coarse quantizer (probe assignment), IVF for partitioning, PQ for storage compression. Used in FAISS for large-scale deployments."
+    source: "FAISS"
     confidence: cited

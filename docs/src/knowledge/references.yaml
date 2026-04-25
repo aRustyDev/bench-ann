@@ -1,9 +1,10 @@
-# Vector DS&A — References (Initial Draft)
-# Status: draft (Run 1 — uncurated dump)
+# Vector DS&A — References (Curated)
+# Status: curated (Run 2)
 # Last updated: 2026-04-24
-# Curation happens in Run 2
+# Run 2: added missing foundational papers, corrected IDs, organized by family
 
 foundational_papers:
+  # --- HNSW ---
   - id: malkov2016hnsw
     title: "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs"
     authors: ["Yu. A. Malkov", "D. A. Yashunin"]
@@ -11,8 +12,10 @@ foundational_papers:
     arxiv: "1603.09320"
     venue: "IEEE TPAMI 2018"
     algorithm: HNSW
+    canonical_for: HNSW
     verified: true
 
+  # --- ANN Theory ---
   - id: andoni2018ann_survey
     title: "Approximate Nearest Neighbor Search in High Dimensions"
     authors: ["Alexandr Andoni", "Piotr Indyk", "Ilya Razenshteyn"]
@@ -22,6 +25,7 @@ foundational_papers:
     topic: "ANN theory survey"
     verified: true
 
+  # --- ScaNN ---
   - id: guo2019scann
     title: "Accelerating Large-Scale Inference with Anisotropic Vector Quantization"
     authors: ["Ruiqi Guo", "Philip Sun", "Erik Lindgren", "Quan Geng", "David Simcha", "Felix Chern", "Sanjiv Kumar"]
@@ -29,6 +33,7 @@ foundational_papers:
     arxiv: "1908.10396"
     venue: "ICML 2020"
     algorithm: ScaNN
+    canonical_for: ScaNN
     verified: true
 
   - id: sun2024soar
@@ -40,24 +45,114 @@ foundational_papers:
     algorithm: "ScaNN / SOAR"
     verified: true
 
+  # --- DiskANN / Vamana ---
   - id: subramanya2019diskann
     title: "DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node"
     authors: ["Suhas Jayaram Subramanya", "Devvrit", "Rohan Kadekodi", "Ravishankar Krishnaswamy", "Harsha Vardhan Simhadri"]
     year: 2019
     venue: "NeurIPS 2019"
     url: "https://suhasjs.github.io/files/diskann_neurips19.pdf"
+    neurips_url: "https://proceedings.neurips.cc/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html"
+    doi: "10.5555/3454287.3455520"
     algorithm: "DiskANN / Vamana"
+    canonical_for: "DiskANN / Vamana"
+    notes: "Not on arXiv. Published directly at NeurIPS 2019."
     verified: true
 
+  # --- Product Quantization ---
   - id: jegou2011pq
     title: "Product Quantization for Nearest Neighbor Search"
     authors: ["Hervé Jégou", "Matthijs Douze", "Cordelia Schmid"]
     year: 2011
-    venue: "IEEE TPAMI"
+    venue: "IEEE TPAMI, Vol. 33, No. 1, pp. 117-128"
+    doi: "10.1109/TPAMI.2010.57"
+    pdf: "https://www.irisa.fr/texmex/people/jegou/papers/jegou_searching_with_quantization.pdf"
     algorithm: PQ
-    verified: false
-    notes: "Need to find arXiv ID in Run 2"
+    canonical_for: PQ
+    notes: "Not on arXiv. arXiv:1102.3828 is a DIFFERENT paper (Searching in one billion vectors) — do not confuse."
+    verified: true
 
+  # --- FAISS ---
+  - id: johnson2017faiss
+    title: "Billion-scale similarity search with GPUs"
+    authors: ["Jeff Johnson", "Matthijs Douze", "Hervé Jégou"]
+    year: 2017
+    arxiv: "1702.08734"
+    venue: "IEEE Transactions on Big Data, 2019"
+    canonical_for: FAISS
+    verified: true
+
+  # --- NSG ---
+  - id: fu2017nsg
+    title: "Fast Approximate Nearest Neighbor Search With The Navigating Spreading-out Graph"
+    authors: ["Cong Fu", "Chao Xiang", "Changxu Wang", "Deng Cai"]
+    year: 2017
+    arxiv: "1707.00143"
+    venue: "PVLDB, Vol. 12, No. 5, pp. 461-474, 2019"
+    algorithm: NSG
+    canonical_for: NSG
+    notes: "Proposes MRNG (Monotonic Relative Neighborhood Graph) and its practical approximation NSG. Deployed at Taobao/Alibaba at billion scale."
+    verified: true
+
+  # --- LSH ---
+  - id: indyk1998lsh
+    title: "Approximate Nearest Neighbors: Towards Removing the Curse of Dimensionality"
+    authors: ["Piotr Indyk", "Rajeev Motwani"]
+    year: 1998
+    venue: "STOC 1998"
+    doi: "10.1145/276698.276876"
+    algorithm: LSH
+    canonical_for: LSH
+    notes: "Not on arXiv. The foundational LSH paper."
+    verified: true
+
+  # --- Random Projection Trees ---
+  - id: dasgupta2008rpt
+    title: "Random projection trees and low dimensional manifolds"
+    authors: ["Sanjoy Dasgupta", "Yoav Freund"]
+    year: 2008
+    arxiv: "0805.1390"
+    venue: "STOC 2008"
+    canonical_for: "RPT (Annoy)"
+    notes: "Theoretical foundation for random projection trees used by Annoy. Annoy itself has no peer-reviewed paper."
+    verified: true
+
+  # --- KD-tree ---
+  - id: bentley1975kdtree
+    title: "Multidimensional binary search trees used for associative searching"
+    authors: ["Jon Louis Bentley"]
+    year: 1975
+    venue: "Communications of the ACM, 18(9):509-517"
+    doi: "10.1145/361002.361007"
+    algorithm: "KD-tree"
+    canonical_for: "KD-tree"
+    notes: "Not on arXiv. The foundational KD-tree paper."
+    verified: true
+
+  # --- VP-tree ---
+  - id: yianilos1993vptree
+    title: "Data structures and algorithms for nearest neighbor search in general metric spaces"
+    authors: ["Peter N. Yianilos"]
+    year: 1993
+    venue: "SODA 1993"
+    doi: "10.5555/313559.313789"
+    algorithm: "VP-tree"
+    canonical_for: "VP-tree"
+    notes: "Not on arXiv."
+    verified: true
+
+  # --- RaBitQ ---
+  - id: gao2024rabitq
+    title: "RaBitQ: Quantizing High-Dimensional Vectors with a Theoretical Error Bound for Approximate Nearest Neighbor Search"
+    authors: ["Jianyang Gao", "Cheng Long"]
+    year: 2024
+    arxiv: "2405.12497"
+    venue: "SIGMOD 2024"
+    algorithm: RaBitQ
+    canonical_for: RaBitQ
+    verified: true
+
+  # --- ANN-Benchmarks ---
   - id: aumueller2018annbenchmarks
     title: "ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms"
     authors: ["Martin Aumüller", "Erik Bernhardsson", "Alexander Faithfull"]
@@ -65,6 +160,16 @@ foundational_papers:
     arxiv: "1807.05614"
     venue: "SISAP 2017 / Information Systems 2019"
     topic: "Benchmark methodology"
+    canonical_for: "ann-benchmarks"
+    verified: true
+
+  # --- RNG (foundational for NSG/MRNG) ---
+  - id: toussaint1980rng
+    title: "The relative neighbourhood graph of a finite planar set"
+    authors: ["Godfried T. Toussaint"]
+    year: 1980
+    venue: "Pattern Recognition, 12(4):261-268"
+    topic: "Relative Neighborhood Graph — foundational for MRNG and NSG"
     verified: true
 
 surveys:
@@ -196,12 +301,13 @@ hnsw_research:
     verified: true
 
 quantization:
-  - id: gao2024rabitq
-    title: "Practical and Asymptotically Optimal Quantization of High-Dimensional Vectors"
+  - id: gao2025rabitq_extended
+    title: "Practical and Asymptotically Optimal Quantization of High-Dimensional Vectors in Euclidean Space"
     authors: ["Jianyang Gao", "et al."]
-    year: 2024
+    year: 2025
     arxiv: "2409.09913"
-    topic: "RaBitQ extension — asymptotically optimal space/error"
+    venue: "SIGMOD 2025"
+    topic: "Extended RaBitQ — variable compression rates, asymptotic optimality proof"
     verified: true
 
   - id: yue2023rpq
@@ -225,6 +331,22 @@ quantization:
     year: 2024
     arxiv: "2404.06004"
     topic: "~10MB memory for billion-scale"
+    verified: true
+
+  - id: gao2026rabitq_revisited
+    title: "Revisiting RaBitQ and TurboQuant"
+    authors: ["Jianyang Gao", "et al."]
+    year: 2026
+    arxiv: "2604.19528"
+    topic: "Compares RaBitQ vs TurboQuant, finds TurboQuant does not consistently improve"
+    verified: true
+
+  - id: shi2026ivf_rabitq_gpu
+    title: "GPU-Native ANN Search with IVF-RaBitQ"
+    authors: ["Shi", "Gao", "et al."]
+    year: 2026
+    arxiv: "2602.23999"
+    topic: "IVF-RaBitQ on GPU, 2.2x faster than CAGRA at 0.95 recall"
     verified: true
 
 filtered_ann:
@@ -252,6 +374,14 @@ graph_variants:
     topic: "Theoretical analysis of HNSW, NSG, DiskANN worst cases"
     verified: true
 
+  - id: ootomo2023cagra
+    title: "CAGRA: Highly Parallel Graph Construction and Approximate Nearest Neighbor Search for GPUs"
+    authors: ["Hiroyuki Ootomo", "et al."]
+    year: 2023
+    arxiv: "2308.15136"
+    topic: "GPU-native graph ANN, 2.2-27x faster than HNSW build, integrated into NVIDIA cuVS"
+    verified: true
+
 deep_hashing:
   - id: cao2017hashnet
     title: "HashNet: Deep Learning to Hash by Continuation"
@@ -275,83 +405,77 @@ lsh:
     arxiv: "2006.11284"
     verified: true
 
+  - id: dhesi2010rpt_revisited
+    title: "Random Projection Trees Revisited"
+    authors: ["Aman Dhesi", "Purushottam Kar"]
+    year: 2010
+    arxiv: "1010.3812"
+    topic: "Theoretical follow-up to Dasgupta & Freund 2008"
+    verified: true
+
 tutorials:
+  # Best tutorial per algorithm family (curated from Run 1 dump)
   - id: pinecone_hnsw
     title: "Hierarchical Navigable Small Worlds (HNSW) — Pinecone"
     url: "https://www.pinecone.io/learn/series/faiss/hnsw/"
     topic: "HNSW tutorial"
-    verified: true
-
-  - id: zilliz_hnsw
-    title: "Understanding HNSW — Zilliz Learn"
-    url: "https://zilliz.com/learn/hierarchical-navigable-small-worlds-HNSW"
-    topic: "HNSW explainer"
+    quality: "best-in-class"
     verified: true
 
   - id: visual_hnsw
     title: "A Visual Guide to the HNSW Algorithm"
     url: "https://cfu288.com/blog/2024-05_visual-guide-to-hnsw/"
-    topic: "Visual HNSW tutorial"
-    verified: true
-
-  - id: weaviate_metrics
-    title: "Distance Metrics in Vector Search — Weaviate"
-    url: "https://weaviate.io/blog/distance-metrics-in-vector-search"
-    topic: "Distance metric comparison"
-    verified: true
-
-  - id: zilliz_metrics
-    title: "Similarity Metrics for Vector Search — Zilliz"
-    url: "https://zilliz.com/blog/similarity-metrics-for-vector-search"
-    topic: "Distance metric comparison"
-    verified: true
-
-  - id: pinecone_similarity
-    title: "Vector Similarity Explained — Pinecone"
-    url: "https://www.pinecone.io/learn/vector-similarity/"
-    topic: "Distance metric tutorial"
-    verified: true
-
-  - id: qdrant_metrics
-    title: "Distance Metrics — Qdrant"
-    url: "https://qdrant.tech/course/essentials/day-1/distance-metrics/"
-    topic: "Distance metric tutorial"
-    verified: true
-
-  - id: milvus_diskann
-    title: "DiskANN Explained — Milvus"
-    url: "https://milvus.io/blog/diskann-explained.md"
-    topic: "DiskANN tutorial"
+    topic: "Visual HNSW tutorial — best for intuition"
+    quality: "best-in-class"
     verified: true
 
   - id: zilliz_diskann
     title: "DiskANN and the Vamana Algorithm — Zilliz"
     url: "https://zilliz.com/learn/DiskANN-and-the-Vamana-Algorithm"
     topic: "DiskANN/Vamana explainer"
+    quality: "best-in-class"
     verified: true
 
   - id: zilliz_scann
     title: "What is ScaNN — Zilliz Learn"
     url: "https://zilliz.com/learn/what-is-scann-scalable-nearest-neighbors-google"
     topic: "ScaNN explainer"
+    quality: "good"
     verified: true
 
   - id: google_soar
     title: "SOAR: New algorithms for faster vector search with ScaNN — Google Research"
     url: "https://research.google/blog/soar-new-algorithms-for-even-faster-vector-search-with-scann/"
     topic: "SOAR blog post"
+    quality: "best-in-class (primary source)"
     verified: true
 
-  - id: google_scann_announce
-    title: "Announcing ScaNN — Google Research"
-    url: "https://research.google/blog/announcing-scann-efficient-vector-similarity-search/"
-    topic: "ScaNN announcement"
+  - id: elastic_rabitq
+    title: "RaBitQ Binary quantization 101 — Elasticsearch Labs"
+    url: "https://www.elastic.co/search-labs/blog/rabitq-explainer-101"
+    topic: "RaBitQ explainer with step-by-step mechanism"
+    quality: "best-in-class"
+    verified: true
+
+  - id: weaviate_metrics
+    title: "Distance Metrics in Vector Search — Weaviate"
+    url: "https://weaviate.io/blog/distance-metrics-in-vector-search"
+    topic: "Distance metric comparison — best overview"
+    quality: "best-in-class"
+    verified: true
+
+  - id: apxml_selection
+    title: "Choosing ANN Algorithms: Performance Trade-offs — apxml.com"
+    url: "https://apxml.com/courses/advanced-vector-search-llms/chapter-1-ann-algorithms/ann-algorithm-selection-tradeoffs"
+    topic: "Algorithm selection trade-offs (HNSW, IVF, PQ, NSG, Vamana)"
+    quality: "good"
     verified: true
 
   - id: apxml_filtering
     title: "Advanced Filtering Strategies — apxml.com"
     url: "https://apxml.com/courses/advanced-vector-search-llms/chapter-2-optimizing-vector-search-performance/advanced-filtering-strategies"
     topic: "Pre/post filtering tutorial"
+    quality: "good"
     verified: true
 
 benchmarks:
@@ -371,14 +495,28 @@ benchmarks:
     url: "https://github.com/google-research/google-research/tree/master/scann"
     verified: true
 
+  - id: diskann_github
+    title: "DiskANN GitHub — Microsoft"
+    url: "https://github.com/microsoft/DiskANN"
+    verified: true
+
   - id: sptag_github
     title: "SPTAG GitHub — Microsoft"
     url: "https://github.com/microsoft/SPTAG"
     verified: true
 
+# Tutorials removed from Run 1 (lower quality or redundant):
+# - zilliz_hnsw: good but pinecone_hnsw is more detailed
+# - pinecone_similarity: covered by weaviate_metrics
+# - zilliz_metrics: covered by weaviate_metrics
+# - qdrant_metrics: covered by weaviate_metrics
+# - milvus_diskann: good but zilliz_diskann is more detailed
+# - google_scann_announce: superseded by google_soar
+# - vectroid comparison: low quality
+
 seed_references_status:
   - url: "https://apxml.com/courses/advanced-vector-search-llms/chapter-1-ann-algorithms/ann-algorithm-selection-tradeoffs"
-    status: "Not yet fetched — related URL for ch2 filtering confirmed"
+    status: "Exists — algorithm selection trade-offs tutorial. Added to tutorials."
   - url: "https://arxiv.org/abs/2204.07922"
     status: "Verified — Survey on Efficient Processing of Similarity Queries"
   - url: "https://arxiv.org/abs/1806.09823"
@@ -386,16 +524,16 @@ seed_references_status:
   - url: "https://arxiv.org/abs/1603.09320"
     status: "Verified — HNSW paper (Malkov & Yashunin)"
   - url: "https://zilliz.com/blog/unlock-advanced-recommendation-engines-with-milvus-new-range-search"
-    status: "Not yet fetched"
+    status: "Exists — range search feature blog. Marginal relevance. Not added to tutorials."
   - url: "https://arxiv.org/html/2502.05575v1"
     status: "Verified — Graph-Based Vector Search evaluation (Azizi et al.)"
   - url: "https://zilliz.com/learn/DiskANN-and-the-Vamana-Algorithm"
-    status: "Verified via web search"
+    status: "Verified — added to tutorials (best-in-class DiskANN explainer)"
   - url: "https://en.wikipedia.org/wiki/Relative_neighborhood_graph"
-    status: "Not yet fetched"
+    status: "Exists — RNG definition (Toussaint 1980). Foundational for NSG. Toussaint 1980 added to refs."
   - url: "https://github.com/microsoft/SPTAG"
     status: "Confirmed exists"
   - url: "https://research.google/blog/soar-new-algorithms-for-even-faster-vector-search-with-scann/"
-    status: "Verified via web search"
+    status: "Verified — SOAR blog post"
   - url: "https://docs.cloud.google.com/vertex-ai/docs/vector-search/overview"
-    status: "Not yet fetched"
+    status: "Exists — Vertex AI Vector Search (ScaNN-based). Useful for production ScaNN deployment context."
