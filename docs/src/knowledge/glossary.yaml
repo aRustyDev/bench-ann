@@ -1,0 +1,202 @@
+# Vector DS&A — Glossary (Initial Draft)
+# Status: draft (Run 1 — terms encountered, definitions brief)
+# Last updated: 2026-04-24
+# Definitions will be refined with precise sources in Run 2
+
+terms:
+  # Core concepts
+  - term: ANN
+    full_name: "Approximate Nearest Neighbor"
+    definition: "Finding a point p' such that distance(q, p') <= c * distance(q, p*) where p* is the true nearest neighbor and c >= 1 is the approximation factor."
+    source: "arXiv:1806.09823"
+    confidence: cited
+
+  - term: kNN
+    full_name: "k-Nearest Neighbors"
+    definition: "Exact search for the k closest points to a query in a dataset."
+    source: standard
+    confidence: cited
+
+  - term: "Recall@k"
+    definition: "Fraction of true k-nearest neighbors returned by an ANN algorithm. Primary quality metric."
+    source: "ann-benchmarks.com"
+    confidence: cited
+
+  - term: QPS
+    full_name: "Queries Per Second"
+    definition: "Throughput metric measuring how many queries an ANN index can process per second."
+    source: standard
+    confidence: cited
+
+  # Algorithm families
+  - term: HNSW
+    full_name: "Hierarchical Navigable Small World"
+    definition: "Graph-based ANN algorithm building multi-layer proximity graphs with skip-list-like hierarchy. Greedy search from top layer achieves logarithmic query complexity."
+    source: "arXiv:1603.09320"
+    confidence: cited
+
+  - term: NSW
+    full_name: "Navigable Small World"
+    definition: "Single-layer small-world graph enabling greedy nearest neighbor search. Predecessor to HNSW."
+    source: "Malkov et al."
+    confidence: cited
+
+  - term: IVF
+    full_name: "Inverted File Index"
+    definition: "Partitions dataset into Voronoi cells via k-means clustering. At query time, searches only the nprobe nearest cells."
+    source: FAISS
+    confidence: cited
+
+  - term: PQ
+    full_name: "Product Quantization"
+    definition: "Compression technique that splits vectors into M sub-vectors and quantizes each via a learned codebook of ksub centroids. Enables asymmetric distance computation."
+    source: "Jégou et al. 2011"
+    confidence: cited
+
+  - term: OPQ
+    full_name: "Optimized Product Quantization"
+    definition: "PQ with a learned rotation matrix applied before quantization to align data variance with subspace boundaries, reducing quantization error."
+    source: FAISS
+    confidence: cited
+
+  - term: ScaNN
+    full_name: "Scalable Nearest Neighbors"
+    definition: "Google's ANN system using learned anisotropic vector quantization that weights quantization error directionally based on query distribution."
+    source: "arXiv:1908.10396"
+    confidence: cited
+
+  - term: SOAR
+    full_name: "Spilling with Orthogonality-Amplified Residuals"
+    definition: "Extension to ScaNN's indexing that adds redundant representations optimized to compensate for each other's weaknesses via orthogonality-amplified residual loss."
+    source: "arXiv:2404.00774"
+    confidence: cited
+
+  - term: DiskANN
+    definition: "Microsoft's disk-based ANN system using the Vamana graph algorithm stored on SSD with PQ-compressed vectors in memory. Enables billion-scale search on single node."
+    source: "Subramanya et al. NeurIPS 2019"
+    confidence: cited
+
+  - term: Vamana
+    definition: "Graph construction algorithm used by DiskANN. Builds a single-layer graph with angular diversity pruning and medoid starting point."
+    source: "Subramanya et al. NeurIPS 2019"
+    confidence: cited
+
+  - term: LSH
+    full_name: "Locality Sensitive Hashing"
+    definition: "Family of hash functions that map similar items to the same bucket with high probability. Provides sub-linear query time with theoretical guarantees."
+    source: "Indyk & Motwani 1998; survey arXiv:2102.08942"
+    confidence: cited
+
+  - term: NSG
+    full_name: "Navigable Spreading-out Graph"
+    definition: "Sparse monotonic search graph where neighbors are selected to be 'spread out' for maximum navigability."
+    source: "Fu et al."
+    confidence: inferred
+
+  - term: SPTAG
+    full_name: "Space Partition Tree And Graph"
+    definition: "Microsoft's ANN approach combining partition trees (KD-tree or BKT) with a relative neighborhood graph."
+    source: "github.com/microsoft/SPTAG"
+    confidence: cited
+
+  - term: RPT
+    full_name: "Random Projection Trees"
+    definition: "Forest of binary trees where each split is defined by a random hyperplane. Annoy uses this approach."
+    source: "Bernhardsson 2015"
+    confidence: cited
+
+  # Distance metrics
+  - term: "Cosine similarity"
+    definition: "Measures angle between vectors: dot(a,b)/(||a||*||b||). Range [-1,1]. Invariant to vector magnitude."
+    source: standard
+    confidence: cited
+
+  - term: "Euclidean distance (L2)"
+    definition: "sqrt(sum((a_i - b_i)^2)). Measures geometric distance. Most intuitive distance metric."
+    source: standard
+    confidence: cited
+
+  - term: "Dot product / Inner product"
+    definition: "sum(a_i * b_i). Sensitive to both angle and magnitude. Equivalent to cosine for normalized vectors."
+    source: standard
+    confidence: cited
+
+  - term: "Manhattan distance (L1)"
+    definition: "sum(|a_i - b_i|). Sum of absolute differences. Less sensitive to outlier dimensions than L2."
+    source: standard
+    confidence: cited
+
+  - term: "Hamming distance"
+    definition: "Number of positions where binary vectors differ. Used for binary codes and quantized representations."
+    source: standard
+    confidence: cited
+
+  - term: "Angular distance"
+    definition: "arccos(cosine_similarity) / pi. Normalized angle between vectors, range [0,1]."
+    source: standard
+    confidence: cited
+
+  # Quantization terms
+  - term: "Scalar quantization"
+    definition: "Quantize each dimension independently from float32 to int8/int4. Simple 4x compression at int8."
+    source: standard
+    confidence: cited
+
+  - term: "Binary quantization"
+    definition: "Reduce each dimension to 1 bit (sign of value). 32x compression. Used for fast Hamming-based candidate filtering."
+    source: standard
+    confidence: cited
+
+  - term: "Anisotropic quantization"
+    definition: "Directionally-dependent quantization loss that penalizes error more in directions aligned with the query. Key innovation of ScaNN."
+    source: "arXiv:1908.10396"
+    confidence: cited
+
+  - term: RaBitQ
+    definition: "Recent quantization method achieving asymptotically optimal space/error trade-off by extending scalar quantization with theoretical guarantees."
+    source: "arXiv:2409.09913"
+    confidence: cited
+
+  # Index terms
+  - term: "nprobe"
+    definition: "Number of IVF partitions searched at query time. Higher nprobe = better recall but slower."
+    source: FAISS
+    confidence: cited
+
+  - term: "ef_search"
+    definition: "HNSW beam width during search. Controls recall/speed trade-off."
+    source: "arXiv:1603.09320"
+    confidence: cited
+
+  - term: "ef_construction"
+    definition: "HNSW beam width during index construction. Higher = better graph quality but slower build."
+    source: "arXiv:1603.09320"
+    confidence: cited
+
+  - term: M
+    definition: "Maximum number of connections per node in HNSW graph. Higher M = better recall, more memory."
+    source: "arXiv:1603.09320"
+    confidence: cited
+
+  # Filtered ANN
+  - term: FANNS
+    full_name: "Filtered Approximate Nearest Neighbor Search"
+    definition: "ANN search with scalar attribute constraints. Three approaches: pre-filter (filter then search), post-filter (search then filter), in-filter (interleave)."
+    source: "arXiv:2505.06501"
+    confidence: cited
+
+  # Benchmarking
+  - term: SIFT1M
+    definition: "Standard benchmark dataset: 1 million 128-dimensional SIFT feature vectors. Most commonly used ANN benchmark."
+    source: "ann-benchmarks.com"
+    confidence: cited
+
+  - term: GloVe
+    definition: "Global Vectors for Word Representation. GloVe-100 (100d) used as ANN benchmark dataset."
+    source: "ann-benchmarks.com"
+    confidence: cited
+
+  - term: ann-benchmarks
+    definition: "Standard benchmarking framework for ANN algorithms by Aumüller et al. Provides reproducible comparisons."
+    source: "arXiv:1807.05614"
+    confidence: cited

@@ -1,0 +1,202 @@
+# Vector DS&A — Algorithm Taxonomy (Draft)
+# Status: draft (Run 1)
+# Last updated: 2026-04-24
+
+families:
+  graph_based:
+    description: "Build proximity graphs over data points; search via greedy traversal"
+    algorithms:
+      - name: HNSW
+        full_name: "Hierarchical Navigable Small World"
+        key_paper: "arXiv:1603.09320 (Malkov & Yashunin, 2016)"
+        description: "Multi-layer proximity graph with skip-list-like hierarchy. Greedy search from top layer down. State-of-the-art in-memory recall/speed."
+        key_params: [M, ef_construction, ef_search]
+        trade_offs: "High recall, fast query, high memory (graph overhead), moderate build time"
+        rust_crates: [hnsw, hnswlib-rs, hnsw_rs, instant-distance, swarc, hora, usearch, granne]
+        reference_impls: [hnswlib, FAISS, NMSLIB, USearch]
+
+      - name: NSW
+        full_name: "Navigable Small World"
+        description: "Single-layer small-world graph (predecessor to HNSW). Greedy search without hierarchy."
+        key_paper: "Malkov et al., 2014"
+        trade_offs: "Simpler than HNSW but sub-logarithmic scaling"
+        rust_crates: []
+        notes: "Hub Highway Hypothesis (arXiv:2412.01940) suggests flat NSW matches HNSW in high-d"
+
+      - name: NSG
+        full_name: "Navigable Spreading-out Graph"
+        description: "Sparse monotonic graph with spread-out neighbor selection for navigability. Lower memory than HNSW."
+        key_paper: "Fu et al."
+        rust_crates: []
+        reference_impls: [NSG]
+
+      - name: SSG
+        full_name: "Satellite System Graph"
+        description: "NSG variant with satellite-system-inspired neighbor selection for better angular diversity."
+        rust_crates: [hora]
+        reference_impls: []
+
+      - name: Vamana
+        full_name: "Vamana / DiskANN"
+        key_paper: "Subramanya et al., NeurIPS 2019"
+        description: "Single-layer graph for SSD-resident indexes. Angular diversity pruning. PQ in memory, graph on SSD."
+        key_params: [R, L, alpha]
+        trade_offs: "Very low memory (SSD-based), billion-scale, higher latency than in-memory HNSW"
+        rust_crates: ["lance (internal)"]
+        reference_impls: [DiskANN, OctopusANN, DiskANN++, DISTRIBUTEDANN]
+
+      - name: SPTAG
+        full_name: "Space Partition Tree And Graph"
+        key_paper: "Microsoft"
+        description: "Combines partition trees (KD-tree or BKT) with relative neighborhood graph. Tree provides entry points, graph refines."
+        rust_crates: []
+        reference_impls: [SPTAG]
+
+      - name: EFANNA
+        full_name: "Extremely Fast ANN based on kNN Graph"
+        key_paper: "arXiv:1609.07228 (Fu & Cai, 2016)"
+        description: "Combines hierarchical structure initialization with NN-expansion for fast graph-based ANN."
+        rust_crates: []
+
+  hash_based:
+    description: "Map similar items to same bucket/code via hash functions"
+    algorithms:
+      - name: LSH
+        full_name: "Locality Sensitive Hashing"
+        description: "Random hash functions that map similar items to same bucket with high probability. Sub-linear query with theoretical guarantees."
+        variants: [random_hyperplane, cross_polytope, multi_probe, p_stable]
+        key_paper: "Indyk & Motwani, 1998; survey arXiv:2102.08942"
+        trade_offs: "Theoretical guarantees, simple, but requires many tables for high recall"
+        rust_crates: [lsh-rs, gaoya]
+        reference_impls: [E2LSH, FALCONN]
+
+      - name: neural_hashing
+        full_name: "Neural / Deep Hashing"
+        description: "Learn hash functions via neural networks. Data-dependent, better recall than LSH for same bits."
+        key_paper: "Survey arXiv:2003.03369 (Luo et al., 2020)"
+        variants: [HashNet, deep_supervised, hadamard_codebook]
+        trade_offs: "Data-adaptive, requires training, weaker theoretical guarantees"
+        rust_crates: []
+        reference_impls: ["various academic"]
+
+  quantization_based:
+    description: "Compress vectors to reduce memory and enable fast approximate distance computation"
+    algorithms:
+      - name: PQ
+        full_name: "Product Quantization"
+        key_paper: "Jégou, Douze, Schmid, 2011"
+        description: "Split vectors into sub-vectors, quantize each via learned codebook. Asymmetric distance via lookup tables."
+        key_params: [M_subquantizers, ksub]
+        trade_offs: "Very compact, fast distance, moderate recall loss"
+        rust_crates: ["faiss (FFI)"]
+        reference_impls: [FAISS]
+
+      - name: OPQ
+        full_name: "Optimized Product Quantization"
+        description: "Learned rotation before PQ to align data variance with subspace boundaries."
+        trade_offs: "Better recall than PQ at same compression, more expensive training"
+        rust_crates: ["faiss (FFI)"]
+        reference_impls: [FAISS]
+
+      - name: ScaNN
+        full_name: "Scalable Nearest Neighbors (Anisotropic Quantization)"
+        key_paper: "arXiv:1908.10396 (Guo et al., 2019)"
+        description: "Learned anisotropic quantization weighting error by direction. SOAR extension adds orthogonality-amplified residuals."
+        trade_offs: "State-of-the-art throughput/recall, complex tuning"
+        rust_crates: []
+        reference_impls: [ScaNN]
+
+      - name: SQ
+        full_name: "Scalar Quantization"
+        description: "Quantize each dimension independently from float32 to int8/int4."
+        trade_offs: "Simple, 4x compression at int8, minimal recall loss"
+        rust_crates: ["qdrant (internal)"]
+        reference_impls: [FAISS]
+
+      - name: binary_quantization
+        full_name: "Binary Quantization"
+        description: "Reduce each dimension to 1 bit (sign). Enables Hamming distance for fast candidate filtering."
+        trade_offs: "32x compression, very fast, significant recall loss without re-ranking"
+        rust_crates: ["qdrant (internal)", "usearch"]
+        reference_impls: [FAISS]
+
+      - name: RaBitQ
+        full_name: "RaBitQ (and extensions)"
+        key_paper: "arXiv:2409.09913 (Gao et al., 2024)"
+        description: "Asymptotically optimal space/error trade-off quantization. Extends to variable compression rates."
+        trade_offs: "State-of-the-art theoretical guarantees, practical implementation"
+        rust_crates: []
+        notes: "Newer method, needs deeper investigation in Run 2"
+
+  tree_based:
+    description: "Hierarchical space partitioning for nearest neighbor search"
+    algorithms:
+      - name: RPT
+        full_name: "Random Projection Trees (Annoy-style)"
+        key_paper: "Bernhardsson, 2015 (Spotify)"
+        description: "Forest of binary trees with random hyperplane splits. Query traverses all trees, merges candidates."
+        key_params: [n_trees, search_k]
+        trade_offs: "Simple build, immutable index, moderate recall, good for medium-scale"
+        rust_crates: [arroy, annoy-rs]
+        reference_impls: [Annoy]
+
+      - name: KD_tree
+        full_name: "KD-tree"
+        description: "Classic space-partitioning on coordinate axes. Effective <20d, degrades in high-d."
+        trade_offs: "Exact NN in low-d, fast build, curse of dimensionality"
+        rust_crates: [kiddo, kd-tree]
+        reference_impls: [scikit-learn, FLANN]
+
+      - name: ball_tree
+        full_name: "Ball Tree"
+        description: "Partitions using nested hyperspheres. Slightly more robust than KD-tree in moderate-d."
+        rust_crates: []
+        reference_impls: [scikit-learn]
+
+      - name: VP_tree
+        full_name: "Vantage Point Tree"
+        description: "Metric tree partitioning by distance from a vantage point. Works with any metric."
+        rust_crates: [vpsearch, space]
+        reference_impls: [NMSLIB]
+
+      - name: MRPT
+        full_name: "Multi-Resolution Projection Trees"
+        description: "Ensemble of RPTs at multiple resolutions with auto-tuning recall/speed trade-off."
+        rust_crates: []
+        reference_impls: [mrpt]
+
+  partition_based:
+    description: "Partition dataset into regions, search only relevant partitions"
+    algorithms:
+      - name: IVF
+        full_name: "Inverted File Index"
+        description: "Partition via k-means into Voronoi cells. Search nprobe nearest cells. Often combined with PQ."
+        key_params: [nlist, nprobe]
+        trade_offs: "Scales well, tunable, requires k-means training"
+        rust_crates: ["faiss (FFI)", "hora"]
+        reference_impls: [FAISS, Milvus]
+
+      - name: IVF_PQ
+        full_name: "IVF + Product Quantization"
+        description: "IVF coarse partitioning + PQ residual compression. Standard billion-scale approach."
+        rust_crates: ["faiss (FFI)", "lance (internal)"]
+        reference_impls: [FAISS]
+
+      - name: IVF_HNSW
+        full_name: "IVF + HNSW coarse quantizer"
+        description: "Uses HNSW for fast partition assignment instead of flat centroid search."
+        rust_crates: ["faiss (FFI)"]
+        reference_impls: [FAISS]
+
+  composite:
+    description: "Combinations of above families for specific deployment scenarios"
+    patterns:
+      - name: "HNSW + PQ"
+        description: "Graph navigation with quantized storage"
+      - name: "IVF + HNSW + PQ"
+        description: "Three-level: HNSW quantizer, IVF partition, PQ storage"
+      - name: "DiskANN + PQ"
+        description: "Vamana graph on SSD + PQ in memory"
+      - name: "Filtered ANN"
+        description: "ANN with scalar attribute constraints (pre/post/in-filter)"
+        key_paper: "arXiv:2505.06501 (survey); Filtered-DiskANN"

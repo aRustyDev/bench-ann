@@ -1,0 +1,401 @@
+# Vector DS&A — References (Initial Draft)
+# Status: draft (Run 1 — uncurated dump)
+# Last updated: 2026-04-24
+# Curation happens in Run 2
+
+foundational_papers:
+  - id: malkov2016hnsw
+    title: "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs"
+    authors: ["Yu. A. Malkov", "D. A. Yashunin"]
+    year: 2016
+    arxiv: "1603.09320"
+    venue: "IEEE TPAMI 2018"
+    algorithm: HNSW
+    verified: true
+
+  - id: andoni2018ann_survey
+    title: "Approximate Nearest Neighbor Search in High Dimensions"
+    authors: ["Alexandr Andoni", "Piotr Indyk", "Ilya Razenshteyn"]
+    year: 2018
+    arxiv: "1806.09823"
+    venue: "ICM 2018"
+    topic: "ANN theory survey"
+    verified: true
+
+  - id: guo2019scann
+    title: "Accelerating Large-Scale Inference with Anisotropic Vector Quantization"
+    authors: ["Ruiqi Guo", "Philip Sun", "Erik Lindgren", "Quan Geng", "David Simcha", "Felix Chern", "Sanjiv Kumar"]
+    year: 2019
+    arxiv: "1908.10396"
+    venue: "ICML 2020"
+    algorithm: ScaNN
+    verified: true
+
+  - id: sun2024soar
+    title: "SOAR: Improved Indexing for Approximate Nearest Neighbor Search"
+    authors: ["Philip Sun", "David Simcha", "Dave Dopson", "Ruiqi Guo", "Sanjiv Kumar"]
+    year: 2024
+    arxiv: "2404.00774"
+    venue: "NeurIPS 2023"
+    algorithm: "ScaNN / SOAR"
+    verified: true
+
+  - id: subramanya2019diskann
+    title: "DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node"
+    authors: ["Suhas Jayaram Subramanya", "Devvrit", "Rohan Kadekodi", "Ravishankar Krishnaswamy", "Harsha Vardhan Simhadri"]
+    year: 2019
+    venue: "NeurIPS 2019"
+    url: "https://suhasjs.github.io/files/diskann_neurips19.pdf"
+    algorithm: "DiskANN / Vamana"
+    verified: true
+
+  - id: jegou2011pq
+    title: "Product Quantization for Nearest Neighbor Search"
+    authors: ["Hervé Jégou", "Matthijs Douze", "Cordelia Schmid"]
+    year: 2011
+    venue: "IEEE TPAMI"
+    algorithm: PQ
+    verified: false
+    notes: "Need to find arXiv ID in Run 2"
+
+  - id: aumueller2018annbenchmarks
+    title: "ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms"
+    authors: ["Martin Aumüller", "Erik Bernhardsson", "Alexander Faithfull"]
+    year: 2018
+    arxiv: "1807.05614"
+    venue: "SISAP 2017 / Information Systems 2019"
+    topic: "Benchmark methodology"
+    verified: true
+
+surveys:
+  - id: wang2022similarity_survey
+    title: "A Survey on Efficient Processing of Similarity Queries over Neural Embeddings"
+    authors: ["Yifan Wang"]
+    year: 2022
+    arxiv: "2204.07922"
+    topic: "Vector DB / similarity query survey"
+    verified: true
+
+  - id: azizi2025graph_ann
+    title: "Graph-Based Vector Search: An Experimental Evaluation of the State-of-the-Art"
+    authors: ["Ilias Azizi", "Karima Echihabi", "Themis Palpanas"]
+    year: 2025
+    arxiv: "2502.05575"
+    topic: "Graph-based ANN evaluation — 12 methods, 7 datasets, 1B vectors"
+    verified: true
+
+  - id: luo2020deep_hashing
+    title: "A Survey on Deep Hashing Methods"
+    authors: ["Xiao Luo", "Haixin Wang", "Daqing Wu", "et al."]
+    year: 2020
+    arxiv: "2003.03369"
+    topic: "Deep/neural hashing survey"
+    verified: true
+
+  - id: jafari2021lsh_survey
+    title: "A Survey on Locality Sensitive Hashing Algorithms and their Applications"
+    authors: ["Omid Jafari", "Preeti Maurya", "Parth Nagarkar", "et al."]
+    year: 2021
+    arxiv: "2102.08942"
+    topic: "LSH survey"
+    verified: true
+
+  - id: lin2025fanns_survey
+    title: "Survey of Filtered Approximate Nearest Neighbor Search over Vector-Scalar Hybrid Data"
+    authors: ["Yanjun Lin", "Kai Zhang", "Zhenying He", "et al."]
+    year: 2025
+    arxiv: "2505.06501"
+    topic: "Filtered ANN survey"
+    verified: true
+
+  - id: wang2024dimreduction
+    title: "Dimensionality-Reduction Techniques for ANNS: A Survey and Evaluation"
+    authors: ["Zeyu Wang", "Haoran Xiong", "Qitong Wang", "et al."]
+    year: 2024
+    arxiv: "2403.13491"
+    topic: "Dimensionality reduction for ANN (PCA, PQ, deep learning)"
+    verified: true
+
+diskann_ecosystem:
+  - id: li2026octopusann
+    title: "I/O Optimizations for Graph-Based Disk-Resident ANN: A Design Space Exploration"
+    authors: ["Liang Li", "Shufeng Gong", "Yanan Yang", "et al."]
+    year: 2026
+    arxiv: "2602.21514"
+    topic: "OctopusANN — 87-149% throughput improvement over DiskANN"
+    verified: true
+
+  - id: jaiswal2022ood_diskann
+    title: "OOD-DiskANN: Efficient and Scalable Graph ANNS for Out-of-Distribution Queries"
+    authors: ["Shikhar Jaiswal", "et al."]
+    year: 2022
+    arxiv: "2211.12850"
+    verified: true
+
+  - id: ni2023diskanpp
+    title: "DiskANN++: Efficient Page-based Search over Isomorphic Mapped Graph Index"
+    authors: ["Jiongkang Ni", "et al."]
+    year: 2023
+    arxiv: "2310.00402"
+    verified: true
+
+  - id: adams2025distributedann
+    title: "DISTRIBUTEDANN: Efficient Scaling of a Single DISKANN Graph Across Thousands of Computers"
+    authors: ["Philip Adams", "et al."]
+    year: 2025
+    arxiv: "2509.06046"
+    topic: "50B vector graph at Bing, 26ms median latency"
+    verified: true
+
+  - id: rubel2026pipnn
+    title: "PiPNN: Ultra-Scalable Graph-Based Nearest Neighbor Indexing"
+    authors: ["Tobias Rubel", "et al."]
+    year: 2026
+    arxiv: "2602.21247"
+    topic: "11.6x faster construction than Vamana"
+    verified: true
+
+hnsw_research:
+  - id: munyampirwa2024hub_highway
+    title: "Down with the Hierarchy: The 'H' in HNSW Stands for \"Hubs\""
+    authors: ["Blaise Munyampirwa", "Vihan Lakshman", "Benjamin Coleman"]
+    year: 2024
+    arxiv: "2412.01940"
+    topic: "Hub Highway Hypothesis — flat NSW matches HNSW in high-d"
+    verified: true
+
+  - id: ponomarenko2025merging_hnsw
+    title: "Three Algorithms for Merging Hierarchical Navigable Small World Graphs"
+    authors: ["Alexander Ponomarenko"]
+    year: 2025
+    arxiv: "2505.16064"
+    verified: true
+
+  - id: elliott2024hnsw_dimensionality
+    title: "Impacts of Data, Ordering, and Intrinsic Dimensionality on Recall in HNSW"
+    authors: ["Owen Pendrigh Elliott", "Jesse Clark"]
+    year: 2024
+    arxiv: "2405.17813"
+    topic: "Insertion order shifts recall by up to 12 percentage points"
+    verified: true
+
+  - id: zhang2025adaptive_ef
+    title: "Distribution-Aware Exploration for Adaptive HNSW Search"
+    authors: ["Chao Zhang", "Renée J. Miller"]
+    year: 2025
+    arxiv: "2512.06636"
+    topic: "Adaptive ef parameter, 4x latency reduction"
+    verified: true
+
+  - id: aljazzazi2025adaptive_beam
+    title: "Distance Adaptive Beam Search for Provably Accurate Graph-Based NN Search"
+    authors: ["Yousef Al-Jazzazi", "et al."]
+    year: 2025
+    arxiv: "2505.15636"
+    topic: "Distance-based termination outperforms beam-width-based"
+    verified: true
+
+quantization:
+  - id: gao2024rabitq
+    title: "Practical and Asymptotically Optimal Quantization of High-Dimensional Vectors"
+    authors: ["Jianyang Gao", "et al."]
+    year: 2024
+    arxiv: "2409.09913"
+    topic: "RaBitQ extension — asymptotically optimal space/error"
+    verified: true
+
+  - id: yue2023rpq
+    title: "Routing-Guided Learned Product Quantization for Graph-Based ANNS"
+    authors: ["Qiang Yue", "et al."]
+    year: 2023
+    arxiv: "2311.18724"
+    topic: "RPQ integrated with DiskANN, 1.7-4.2x QPS improvement"
+    verified: true
+
+  - id: babenko2014bilayer_pq
+    title: "Improving Bilayer Product Quantization for Billion-Scale ANN"
+    authors: ["Artem Babenko", "Victor Lempitsky"]
+    year: 2014
+    arxiv: "1404.1831"
+    verified: true
+
+  - id: tatsuno2024aisaq
+    title: "AiSAQ: All-in-Storage ANNS with Product Quantization for DRAM-free Information Retrieval"
+    authors: ["Kento Tatsuno", "et al."]
+    year: 2024
+    arxiv: "2404.06004"
+    topic: "~10MB memory for billion-scale"
+    verified: true
+
+filtered_ann:
+  - id: engels2024window_filters
+    title: "Approximate Nearest Neighbor Search with Window Filters"
+    authors: ["Joshua Engels", "et al."]
+    year: 2024
+    arxiv: "2402.00943"
+    topic: "75x speedup for filtered ANN with window queries"
+    verified: true
+
+graph_variants:
+  - id: fu2016efanna
+    title: "EFANNA: An Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph"
+    authors: ["Cong Fu", "Deng Cai"]
+    year: 2016
+    arxiv: "1609.07228"
+    verified: true
+
+  - id: indyk2023worstcase
+    title: "Worst-case Performance of Popular ANN Search Implementations"
+    authors: ["Piotr Indyk", "Haike Xu"]
+    year: 2023
+    arxiv: "2310.19126"
+    topic: "Theoretical analysis of HNSW, NSG, DiskANN worst cases"
+    verified: true
+
+deep_hashing:
+  - id: cao2017hashnet
+    title: "HashNet: Deep Learning to Hash by Continuation"
+    authors: ["Zhangjie Cao", "Mingsheng Long", "Jianmin Wang", "Philip S. Yu"]
+    year: 2017
+    arxiv: "1702.00758"
+    verified: true
+
+  - id: chen2019hadamard
+    title: "Hadamard Codebook Based Deep Hashing"
+    authors: ["Shen Chen", "et al."]
+    year: 2019
+    arxiv: "1910.09182"
+    verified: true
+
+lsh:
+  - id: jafari2020rolsh
+    title: "Improving LSH by Efficiently Finding Projected Nearest Neighbors (roLSH)"
+    authors: ["Omid Jafari", "Parth Nagarkar", "Jonathan Montaño"]
+    year: 2020
+    arxiv: "2006.11284"
+    verified: true
+
+tutorials:
+  - id: pinecone_hnsw
+    title: "Hierarchical Navigable Small Worlds (HNSW) — Pinecone"
+    url: "https://www.pinecone.io/learn/series/faiss/hnsw/"
+    topic: "HNSW tutorial"
+    verified: true
+
+  - id: zilliz_hnsw
+    title: "Understanding HNSW — Zilliz Learn"
+    url: "https://zilliz.com/learn/hierarchical-navigable-small-worlds-HNSW"
+    topic: "HNSW explainer"
+    verified: true
+
+  - id: visual_hnsw
+    title: "A Visual Guide to the HNSW Algorithm"
+    url: "https://cfu288.com/blog/2024-05_visual-guide-to-hnsw/"
+    topic: "Visual HNSW tutorial"
+    verified: true
+
+  - id: weaviate_metrics
+    title: "Distance Metrics in Vector Search — Weaviate"
+    url: "https://weaviate.io/blog/distance-metrics-in-vector-search"
+    topic: "Distance metric comparison"
+    verified: true
+
+  - id: zilliz_metrics
+    title: "Similarity Metrics for Vector Search — Zilliz"
+    url: "https://zilliz.com/blog/similarity-metrics-for-vector-search"
+    topic: "Distance metric comparison"
+    verified: true
+
+  - id: pinecone_similarity
+    title: "Vector Similarity Explained — Pinecone"
+    url: "https://www.pinecone.io/learn/vector-similarity/"
+    topic: "Distance metric tutorial"
+    verified: true
+
+  - id: qdrant_metrics
+    title: "Distance Metrics — Qdrant"
+    url: "https://qdrant.tech/course/essentials/day-1/distance-metrics/"
+    topic: "Distance metric tutorial"
+    verified: true
+
+  - id: milvus_diskann
+    title: "DiskANN Explained — Milvus"
+    url: "https://milvus.io/blog/diskann-explained.md"
+    topic: "DiskANN tutorial"
+    verified: true
+
+  - id: zilliz_diskann
+    title: "DiskANN and the Vamana Algorithm — Zilliz"
+    url: "https://zilliz.com/learn/DiskANN-and-the-Vamana-Algorithm"
+    topic: "DiskANN/Vamana explainer"
+    verified: true
+
+  - id: zilliz_scann
+    title: "What is ScaNN — Zilliz Learn"
+    url: "https://zilliz.com/learn/what-is-scann-scalable-nearest-neighbors-google"
+    topic: "ScaNN explainer"
+    verified: true
+
+  - id: google_soar
+    title: "SOAR: New algorithms for faster vector search with ScaNN — Google Research"
+    url: "https://research.google/blog/soar-new-algorithms-for-even-faster-vector-search-with-scann/"
+    topic: "SOAR blog post"
+    verified: true
+
+  - id: google_scann_announce
+    title: "Announcing ScaNN — Google Research"
+    url: "https://research.google/blog/announcing-scann-efficient-vector-similarity-search/"
+    topic: "ScaNN announcement"
+    verified: true
+
+  - id: apxml_filtering
+    title: "Advanced Filtering Strategies — apxml.com"
+    url: "https://apxml.com/courses/advanced-vector-search-llms/chapter-2-optimizing-vector-search-performance/advanced-filtering-strategies"
+    topic: "Pre/post filtering tutorial"
+    verified: true
+
+benchmarks:
+  - id: ann_benchmarks
+    title: "ANN-Benchmarks"
+    url: "https://ann-benchmarks.com/"
+    notes: "April 2025 run on r6i.16xlarge, single-CPU"
+    verified: true
+
+  - id: ann_benchmarks_github
+    title: "ANN-Benchmarks GitHub"
+    url: "https://github.com/erikbern/ann-benchmarks"
+    verified: true
+
+  - id: scann_github
+    title: "ScaNN GitHub"
+    url: "https://github.com/google-research/google-research/tree/master/scann"
+    verified: true
+
+  - id: sptag_github
+    title: "SPTAG GitHub — Microsoft"
+    url: "https://github.com/microsoft/SPTAG"
+    verified: true
+
+seed_references_status:
+  - url: "https://apxml.com/courses/advanced-vector-search-llms/chapter-1-ann-algorithms/ann-algorithm-selection-tradeoffs"
+    status: "Not yet fetched — related URL for ch2 filtering confirmed"
+  - url: "https://arxiv.org/abs/2204.07922"
+    status: "Verified — Survey on Efficient Processing of Similarity Queries"
+  - url: "https://arxiv.org/abs/1806.09823"
+    status: "Verified — Approximate NN Search in High Dimensions (Andoni et al.)"
+  - url: "https://arxiv.org/abs/1603.09320"
+    status: "Verified — HNSW paper (Malkov & Yashunin)"
+  - url: "https://zilliz.com/blog/unlock-advanced-recommendation-engines-with-milvus-new-range-search"
+    status: "Not yet fetched"
+  - url: "https://arxiv.org/html/2502.05575v1"
+    status: "Verified — Graph-Based Vector Search evaluation (Azizi et al.)"
+  - url: "https://zilliz.com/learn/DiskANN-and-the-Vamana-Algorithm"
+    status: "Verified via web search"
+  - url: "https://en.wikipedia.org/wiki/Relative_neighborhood_graph"
+    status: "Not yet fetched"
+  - url: "https://github.com/microsoft/SPTAG"
+    status: "Confirmed exists"
+  - url: "https://research.google/blog/soar-new-algorithms-for-even-faster-vector-search-with-scann/"
+    status: "Verified via web search"
+  - url: "https://docs.cloud.google.com/vertex-ai/docs/vector-search/overview"
+    status: "Not yet fetched"
