@@ -1,0 +1,15 @@
+[package]
+name = "ann-bench-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ann-bench"
+path = "src/main.rs"
+
+[dependencies]
+ann-bench-core = { path = "../ann-bench-core" }
+ann-bench-datasets = { path = "../ann-bench-datasets" }
+ann-bench-harness = { path = "../ann-bench-harness" }
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }

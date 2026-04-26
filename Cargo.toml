@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "ann-bench-core",
+    "ann-bench-datasets",
+    "ann-bench-harness",
+    "ann-bench-cli",
+    "adapters/ann-bench-hnsw-rs",
+]

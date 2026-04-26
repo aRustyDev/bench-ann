@@ -1,0 +1,11 @@
+[package]
+name = "ann-bench-harness"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ann-bench-core = { path = "../ann-bench-core" }
+ann-bench-datasets = { path = "../ann-bench-datasets" }
+anyhow = "1"
+memory-stats = "1"
+serde_json = "1"

@@ -1,0 +1,10 @@
+[package]
+name = "ann-bench-hnsw-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ann-bench-core = { path = "../../ann-bench-core" }
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+hnsw_rs = "0.3"
