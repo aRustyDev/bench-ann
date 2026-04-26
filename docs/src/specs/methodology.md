@@ -114,11 +114,33 @@ Each crate in a cohort is evaluated using the `crate-evaluation.md` template. Al
 
 ### Cohort iteration
 
-A cohort runs iteratively until "done":
-1. Evaluate first batch of crates
-2. Synthesize — are the results clear enough to rank?
-3. If not: deeper evaluation on ambiguous candidates, or discover additional crates
-4. When ranking is clear: produce cohort synthesis
+Each cohort follows a structured two-pass evaluation:
+
+**Pass 1 — Initial Evaluation**:
+1. Build search-term matrix (search-term-matrices skill) covering all crates in the cohort
+2. Source code examination (analyze-codebase formula) for all crates
+3. Initial benchmarks (execute-benchmark formula) — first parameter sweep using the shared harness
+4. Draft per-crate evaluations using crate-evaluation.md template
+5. Scope review (Rule #10): do findings reveal dimensions not in the evaluation framework?
+6. Provenance check: did findings change prior understanding in knowledge artifacts?
+
+**Pass 2 — Refinement**:
+1. Build follow-up search-term matrix based on Pass 1 gaps
+2. Targeted source code examination on specific questions from Pass 1
+3. Refined benchmarks with tuned parameters — sweep the Pareto frontier
+4. Update per-crate evaluations with new data
+5. Scope review: any new dimensions discovered?
+6. Convergence assessment
+
+**Pass 3 — Resolution (only if needed)**:
+Triggered when Pass 2 convergence fails. Focused on specific unresolved questions. Must have written justification.
+
+**Convergence criteria for a cohort**:
+- All acceptance criteria (per cohort-definitions.md) are met
+- No unanswered questions from source code examination
+- Benchmark results produce stable tier classifications across re-runs
+- No scope expansions introduced without resolution
+- All knowledge artifact changes have epistemic timeline entries (Rule #13)
 
 ### Cross-cohort synthesis
 
@@ -268,3 +290,4 @@ Per `docs/src/methodology/grounding.md`:
 |------|--------|--------|
 | 2026-04-24 | Initial draft | aRustyDev + Claude |
 | 2026-04-24 | Added Phase 2.5 (Benchmarking), Phase 2.75 (Synthesis & Frameworks), Phase 4 protocol, Q→Phase mapping, phase transitions, success criteria per code review | Claude |
+| 2026-04-25 | Expanded Cohort iteration subsection with two-pass pattern, convergence criteria, shared harness prerequisite | aRustyDev + Claude |
