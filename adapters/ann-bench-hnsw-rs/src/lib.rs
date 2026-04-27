@@ -341,4 +341,39 @@ mod tests {
         assert_eq!(sweep[0].ef_search, 10);
         assert_eq!(sweep[5].ef_search, 500);
     }
+
+    #[test]
+    fn test_save_and_load() {
+        let dim = 4;
+        let vectors = vec![
+            1.0f32, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+            0.5, 0.5, 0.0, 0.0,
+        ];
+        let config = HnswBuildConfig {
+            m: 8,
+            ef_construction: 50,
+            max_elements: 100,
+        };
+        let index =
+            HnswIndex::build(&vectors, 5, dim, DistanceMetric::Euclidean, &config).unwrap();
+
+        let tmp = tempfile::tempdir().unwrap();
+        let save_path = tmp.path().join("test_index");
+        let bytes = index.save(&save_path).unwrap();
+        assert!(bytes > 0, "save should write non-zero bytes");
+
+        // Load and query
+        let loaded = HnswIndex::load(&save_path, DistanceMetric::Euclidean).unwrap();
+        let query = vec![1.0f32, 0.0, 0.0, 0.0];
+        let qc = HnswQueryConfig { ef_search: 10 };
+        let results = loaded.query(&query, 2, &qc).unwrap();
+
+        assert!(!results.is_empty());
+        // Closest should be vector 0 (exact match)
+        assert_eq!(results[0].0, 0);
+        assert!(results[0].1 < 0.01);
+    }
 }

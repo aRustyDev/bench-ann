@@ -24,8 +24,10 @@ dependencies = [
  "ann-bench-core",
  "ann-bench-datasets",
  "ann-bench-harness",
+ "ann-bench-hnsw-rs",
  "anyhow",
  "clap",
+ "serde_json",
 ]
 
 [[package]]
@@ -68,6 +70,7 @@ dependencies = [
  "anyhow",
  "hnsw_rs",
  "serde",
+ "tempfile",
 ]
 
 [[package]]

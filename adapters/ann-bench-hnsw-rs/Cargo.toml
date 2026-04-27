@@ -8,3 +8,6 @@ ann-bench-core = { path = "../../ann-bench-core" }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 hnsw_rs = "0.3"
+
+[dev-dependencies]
+tempfile = "3"

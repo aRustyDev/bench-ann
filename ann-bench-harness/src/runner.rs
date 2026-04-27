@@ -4,6 +4,7 @@ use std::time::Instant;
 use ann_bench_core::*;
 
 use crate::filtered;
+use crate::incremental;
 use crate::measurement::{self, compute_latency_percentiles};
 use crate::memory;
 use crate::output;
@@ -146,8 +147,32 @@ pub fn run_benchmark<I: AnnIndex>(
     };
 
     // === Incremental benchmark ===
-    // Skipped here — run separately if adapter supports it and dataset is large enough
-    let incremental_result = None;
+    let incremental_result = if index.supports_incremental_updates()
+        && !query_configs.is_empty()
+        && n_base >= 1000
+    {
+        eprintln!("  Running incremental benchmark...");
+        let qc = &query_configs[query_configs.len() / 2];
+        match incremental::run_incremental_benchmark::<I>(
+            base_vectors, n_base, dim, metric, &build_config, qc,
+            queries, n_queries, k, ground_truth, n_runs,
+        ) {
+            Ok(ir) => Some(IncrementalResult {
+                inserted: ir.inserted,
+                deleted: ir.deleted,
+                recall_at_10_after_update: ir.recall_at_10_after_update,
+                qps_after_update: ir.qps_after_update,
+                recall_at_10_fresh_build: ir.recall_at_10_fresh_build,
+                qps_fresh_build: ir.qps_fresh_build,
+            }),
+            Err(e) => {
+                eprintln!("    Incremental benchmark failed: {e}");
+                None
+            }
+        }
+    } else {
+        None
+    };
 
     // === Pareto frontier ===
     let pareto_points: Vec<(f64, f64)> = query_sweeps

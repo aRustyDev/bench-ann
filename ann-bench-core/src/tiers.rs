@@ -104,7 +104,7 @@ pub fn classify_tiers(
         .map(|s| s.qps)
         .fold(0.0_f64, f64::max);
 
-    // Worst-case p99 latency among sweeps with recall >= 0.95
+    // Best (lowest) p99 latency among sweeps with recall >= 0.95
     let p99_at_target = sweeps
         .iter()
         .filter(|s| s.recall_at_10 >= 0.95)
