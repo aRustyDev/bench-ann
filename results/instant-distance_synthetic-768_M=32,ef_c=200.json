@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "harness_version": "0.1.0",
+  "timestamp": "2026-04-27T02:38:18Z",
+  "hardware": {
+    "cpu": "Apple M5",
+    "cores_used": 1,
+    "ram_gb": 32,
+    "os": "macOS 26.4",
+    "storage": "NVMe SSD"
+  },
+  "crate_name": "instant-distance",
+  "crate_version": "0.6.1",
+  "dataset": {
+    "name": "synthetic-768",
+    "source": "synthetic",
+    "n_vectors": 10000,
+    "n_queries": 1000,
+    "dimension": 768,
+    "metric": "euclidean"
+  },
+  "build": {
+    "config": {
+      "ef_construction": 200
+    },
+    "time_s": 44.845497625,
+    "memory_per_vector_bytes": 7299,
+    "rss_before_bytes": 42549248,
+    "rss_after_bytes": 146259968
+  },
+  "index_size": {
+    "disk_bytes": 64915428,
+    "disk_per_vector_bytes": 6491.5428
+  },
+  "query_sweeps": [
+    {
+      "config": {
+        "ef_search": 10
+      },
+      "recall_at_1": 0.531,
+      "recall_at_10": 0.4334999999999999,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 3027.8482527962133,
+      "latency_p50_us": 323,
+      "latency_p99_us": 462,
+      "run_times_s": [
+        0.337769666,
+        0.3303525,
+        0.330267542
+      ],
+      "best_run_s": 0.330267542
+    },
+    {
+      "config": {
+        "ef_search": 20
+      },
+      "recall_at_1": 0.705,
+      "recall_at_10": 0.5973000000000017,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 1969.8844071829865,
+      "latency_p50_us": 497,
+      "latency_p99_us": 649,
+      "run_times_s": [
+        0.512983458,
+        0.507644,
+        0.508908666
+      ],
+      "best_run_s": 0.507644
+    },
+    {
+      "config": {
+        "ef_search": 50
+      },
+      "recall_at_1": 0.888,
+      "recall_at_10": 0.8108999999999957,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 1056.6239022303705,
+      "latency_p50_us": 938,
+      "latency_p99_us": 1073,
+      "run_times_s": [
+        0.951035167,
+        0.959349375,
+        0.946410542
+      ],
+      "best_run_s": 0.946410542
+    },
+    {
+      "config": {
+        "ef_search": 100
+      },
+      "recall_at_1": 0.96,
+      "recall_at_10": 0.9305999999999933,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 633.3750152997277,
+      "latency_p50_us": 1574,
+      "latency_p99_us": 1774,
+      "run_times_s": [
+        1.624462917,
+        1.6276342499999998,
+        1.578843459
+      ],
+      "best_run_s": 1.578843459
+    },
+    {
+      "config": {
+        "ef_search": 200
+      },
+      "recall_at_1": 0.992,
+      "recall_at_10": 0.9828999999999976,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 327.73260617053944,
+      "latency_p50_us": 3046,
+      "latency_p99_us": 3456,
+      "run_times_s": [
+        3.083249916,
+        3.051267958,
+        3.132882166
+      ],
+      "best_run_s": 3.051267958
+    },
+    {
+      "config": {
+        "ef_search": 500
+      },
+      "recall_at_1": 1.0,
+      "recall_at_10": 0.9979999999999998,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 250.8279542946188,
+      "latency_p50_us": 3954,
+      "latency_p99_us": 4440,
+      "run_times_s": [
+        4.0251396249999996,
+        3.986796459,
+        4.035297125
+      ],
+      "best_run_s": 3.986796459
+    }
+  ],
+  "filtered": null,
+  "incremental": null,
+  "pareto_frontier": [
+    {
+      "recall_at_10": 0.9979999999999998,
+      "qps": 250.8279542946188
+    },
+    {
+      "recall_at_10": 0.9828999999999976,
+      "qps": 327.73260617053944
+    },
+    {
+      "recall_at_10": 0.9305999999999933,
+      "qps": 633.3750152997277
+    },
+    {
+      "recall_at_10": 0.8108999999999957,
+      "qps": 1056.6239022303705
+    },
+    {
+      "recall_at_10": 0.5973000000000017,
+      "qps": 1969.8844071829865
+    },
+    {
+      "recall_at_10": 0.4334999999999999,
+      "qps": 3027.8482527962133
+    }
+  ],
+  "tier_classification": {
+    "recall_at_10": "excellent",
+    "qps_at_0_95_recall": "acceptable",
+    "build_time": "good",
+    "memory_per_vector": "unacceptable",
+    "disk_per_vector": "unacceptable",
+    "latency_p99": "good"
+  }
+}

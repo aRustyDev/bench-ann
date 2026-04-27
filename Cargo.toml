@@ -6,4 +6,6 @@ members = [
     "ann-bench-harness",
     "ann-bench-cli",
     "adapters/ann-bench-hnsw-rs",
+    "adapters/ann-bench-usearch",
+    "adapters/ann-bench-instant-distance",
 ]

@@ -12,6 +12,8 @@ ann-bench-core = { path = "../ann-bench-core" }
 ann-bench-datasets = { path = "../ann-bench-datasets" }
 ann-bench-harness = { path = "../ann-bench-harness" }
 ann-bench-hnsw-rs = { path = "../adapters/ann-bench-hnsw-rs" }
+ann-bench-usearch = { path = "../adapters/ann-bench-usearch" }
+ann-bench-instant-distance = { path = "../adapters/ann-bench-instant-distance" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 serde_json = "1"

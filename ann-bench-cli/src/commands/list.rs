@@ -13,6 +13,8 @@ pub struct ListArgs {
 /// Known adapters (compiled into the binary).
 const ADAPTERS: &[(&str, &str)] = &[
     ("hnsw-rs", "NSW/HNSW — pure Rust, filtered search"),
+    ("usearch", "NSW/HNSW — FFI (C++), filtered search, multi-precision"),
+    ("instant-distance", "NSW/HNSW — pure Rust, clean API, M=32 fixed"),
 ];
 
 /// Built-in dataset definitions.

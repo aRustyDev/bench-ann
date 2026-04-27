@@ -56,6 +56,8 @@ pub struct RunArgs {
 pub fn execute(args: RunArgs) -> anyhow::Result<()> {
     match args.adapter.as_str() {
         "hnsw-rs" => run_hnsw_rs(&args),
+        "usearch" => run_usearch(&args),
+        "instant-distance" => run_instant_distance(&args),
         other => {
             anyhow::bail!(
                 "unknown adapter: {other}. Run `ann-bench list --adapters` to see available adapters."
@@ -135,6 +137,166 @@ fn run_hnsw_rs(args: &RunArgs) -> anyhow::Result<()> {
     };
 
     let result = runner::run_benchmark::<ann_bench_hnsw_rs::HnswIndex>(config)?;
+
+    eprintln!(
+        "\n  Done. Best recall@10: {:.4}, Best QPS: {:.0}",
+        result.query_sweeps.iter().map(|s| s.recall_at_10).fold(0.0_f64, f64::max),
+        result.query_sweeps.iter().map(|s| s.qps).fold(0.0_f64, f64::max),
+    );
+
+    Ok(())
+}
+
+fn run_usearch(args: &RunArgs) -> anyhow::Result<()> {
+    use ann_bench_usearch::{default_sweep, UsearchBuildConfig};
+
+    let metric = parse_metric(&args.metric)?;
+    let (dim, base, n_base, queries, n_queries) = load_dataset(args)?;
+
+    eprintln!(
+        "Running usearch on {} ({} vectors, {}d, {})",
+        args.dataset, n_base, dim, args.metric
+    );
+
+    let gt_k = 100;
+    let gt_cache = args.gt_dir.join(format!(
+        "{}_{}_k{}",
+        args.dataset, args.metric, gt_k
+    ));
+    let gt = if gt_cache.exists() {
+        eprintln!("  Loading cached ground truth from {}", gt_cache.display());
+        ground_truth::load_ground_truth(&gt_cache)?
+    } else {
+        eprintln!("  Computing ground truth (k={gt_k})...");
+        let gt = ground_truth::compute_ground_truth(
+            &base, n_base, &queries, n_queries, dim, gt_k, metric,
+        );
+        ground_truth::save_ground_truth(&gt, &gt_cache)?;
+        eprintln!("  Cached to {}", gt_cache.display());
+        gt
+    };
+
+    let build_config = UsearchBuildConfig::default();
+    let query_configs = default_sweep();
+
+    let hardware = HardwareInfo {
+        cpu: detect_cpu(),
+        cores_used: 1,
+        ram_gb: detect_ram_gb(),
+        os: detect_os(),
+        storage: "NVMe SSD".to_string(),
+    };
+
+    let dataset_info = DatasetInfo {
+        name: args.dataset.clone(),
+        source: if args.dataset.starts_with("sift") { "fvecs" } else { "synthetic" }.to_string(),
+        n_vectors: n_base,
+        n_queries,
+        dimension: dim,
+        metric: args.metric.clone(),
+    };
+
+    std::fs::create_dir_all(&args.output_dir)?;
+
+    let config = BenchmarkRunConfig {
+        crate_version: "2.25.1",
+        hardware,
+        dataset: dataset_info,
+        base_vectors: &base,
+        n_base,
+        queries: &queries,
+        n_queries,
+        dim,
+        metric,
+        build_config,
+        query_configs,
+        k: args.k,
+        n_runs: args.runs,
+        ground_truth: &gt,
+        output_dir: &args.output_dir,
+    };
+
+    let result = runner::run_benchmark::<ann_bench_usearch::UsearchIndex>(config)?;
+
+    eprintln!(
+        "\n  Done. Best recall@10: {:.4}, Best QPS: {:.0}",
+        result.query_sweeps.iter().map(|s| s.recall_at_10).fold(0.0_f64, f64::max),
+        result.query_sweeps.iter().map(|s| s.qps).fold(0.0_f64, f64::max),
+    );
+
+    Ok(())
+}
+
+fn run_instant_distance(args: &RunArgs) -> anyhow::Result<()> {
+    use ann_bench_instant_distance::{default_sweep, InstantDistanceBuildConfig};
+
+    let metric = parse_metric(&args.metric)?;
+    let (dim, base, n_base, queries, n_queries) = load_dataset(args)?;
+
+    eprintln!(
+        "Running instant-distance on {} ({} vectors, {}d, {})",
+        args.dataset, n_base, dim, args.metric
+    );
+
+    let gt_k = 100;
+    let gt_cache = args.gt_dir.join(format!(
+        "{}_{}_k{}",
+        args.dataset, args.metric, gt_k
+    ));
+    let gt = if gt_cache.exists() {
+        eprintln!("  Loading cached ground truth from {}", gt_cache.display());
+        ground_truth::load_ground_truth(&gt_cache)?
+    } else {
+        eprintln!("  Computing ground truth (k={gt_k})...");
+        let gt = ground_truth::compute_ground_truth(
+            &base, n_base, &queries, n_queries, dim, gt_k, metric,
+        );
+        ground_truth::save_ground_truth(&gt, &gt_cache)?;
+        eprintln!("  Cached to {}", gt_cache.display());
+        gt
+    };
+
+    let build_config = InstantDistanceBuildConfig::default();
+    let query_configs = default_sweep();
+
+    let hardware = HardwareInfo {
+        cpu: detect_cpu(),
+        cores_used: 1,
+        ram_gb: detect_ram_gb(),
+        os: detect_os(),
+        storage: "NVMe SSD".to_string(),
+    };
+
+    let dataset_info = DatasetInfo {
+        name: args.dataset.clone(),
+        source: if args.dataset.starts_with("sift") { "fvecs" } else { "synthetic" }.to_string(),
+        n_vectors: n_base,
+        n_queries,
+        dimension: dim,
+        metric: args.metric.clone(),
+    };
+
+    std::fs::create_dir_all(&args.output_dir)?;
+
+    let config = BenchmarkRunConfig {
+        crate_version: "0.6.1",
+        hardware,
+        dataset: dataset_info,
+        base_vectors: &base,
+        n_base,
+        queries: &queries,
+        n_queries,
+        dim,
+        metric,
+        build_config,
+        query_configs,
+        k: args.k,
+        n_runs: args.runs,
+        ground_truth: &gt,
+        output_dir: &args.output_dir,
+    };
+
+    let result = runner::run_benchmark::<ann_bench_instant_distance::InstantDistanceIndex>(config)?;
 
     eprintln!(
         "\n  Done. Best recall@10: {:.4}, Best QPS: {:.0}",
