@@ -48,6 +48,14 @@ pub struct RunArgs {
     #[arg(long, default_value = "ground_truth")]
     pub gt_dir: PathBuf,
 
+    /// HNSW M parameter (bidirectional links per node)
+    #[arg(long, short = 'M')]
+    pub m: Option<usize>,
+
+    /// HNSW ef_construction parameter
+    #[arg(long)]
+    pub ef_construction: Option<usize>,
+
     /// Verbose output
     #[arg(short, long)]
     pub verbose: bool,
@@ -96,7 +104,15 @@ fn run_hnsw_rs(args: &RunArgs) -> anyhow::Result<()> {
         gt
     };
 
-    let build_config = HnswBuildConfig::default();
+    let mut build_config = HnswBuildConfig::default();
+    if let Some(m) = args.m {
+        build_config.m = m;
+    }
+    if let Some(ef_c) = args.ef_construction {
+        build_config.ef_construction = ef_c;
+    }
+    // hnsw_rs needs max_elements set to at least n
+    build_config.max_elements = n_base + 1000;
     let query_configs = default_sweep();
 
     let hardware = HardwareInfo {
@@ -176,7 +192,13 @@ fn run_usearch(args: &RunArgs) -> anyhow::Result<()> {
         gt
     };
 
-    let build_config = UsearchBuildConfig::default();
+    let mut build_config = UsearchBuildConfig::default();
+    if let Some(m) = args.m {
+        build_config.m = m;
+    }
+    if let Some(ef_c) = args.ef_construction {
+        build_config.ef_construction = ef_c;
+    }
     let query_configs = default_sweep();
 
     let hardware = HardwareInfo {
@@ -256,7 +278,14 @@ fn run_instant_distance(args: &RunArgs) -> anyhow::Result<()> {
         gt
     };
 
-    let build_config = InstantDistanceBuildConfig::default();
+    let mut build_config = InstantDistanceBuildConfig::default();
+    if let Some(ef_c) = args.ef_construction {
+        build_config.ef_construction = ef_c;
+    }
+    // instant-distance M=32 is hardcoded, --m is ignored
+    if args.m.is_some() {
+        eprintln!("  Warning: instant-distance has M=32 hardcoded, --m is ignored");
+    }
     let query_configs = default_sweep();
 
     let hardware = HardwareInfo {

@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "harness_version": "0.1.0",
+  "timestamp": "2026-04-27T03:44:04Z",
+  "hardware": {
+    "cpu": "Apple M5",
+    "cores_used": 1,
+    "ram_gb": 32,
+    "os": "macOS 26.4",
+    "storage": "NVMe SSD"
+  },
+  "crate_name": "usearch",
+  "crate_version": "2.25.1",
+  "dataset": {
+    "name": "synthetic-768",
+    "source": "synthetic",
+    "n_vectors": 10000,
+    "n_queries": 1000,
+    "dimension": 768,
+    "metric": "euclidean"
+  },
+  "build": {
+    "config": {
+      "M": 32,
+      "ef_construction": 200
+    },
+    "time_s": 21.360622708,
+    "memory_per_vector_bytes": 524,
+    "rss_before_bytes": 42483712,
+    "rss_after_bytes": 78446592
+  },
+  "index_size": {
+    "disk_bytes": 33482352,
+    "disk_per_vector_bytes": 3348.2352
+  },
+  "query_sweeps": [
+    {
+      "config": {
+        "ef_search": 10
+      },
+      "recall_at_1": 0.452,
+      "recall_at_10": 0.3819999999999997,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 4387.60785974134,
+      "latency_p50_us": 220,
+      "latency_p99_us": 320,
+      "run_times_s": [
+        0.232670041,
+        0.227914625,
+        0.2316
+      ],
+      "best_run_s": 0.227914625
+    },
+    {
+      "config": {
+        "ef_search": 20
+      },
+      "recall_at_1": 0.607,
+      "recall_at_10": 0.5307999999999998,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 2769.4342186855424,
+      "latency_p50_us": 356,
+      "latency_p99_us": 461,
+      "run_times_s": [
+        0.3634725,
+        0.361084583,
+        0.36367625
+      ],
+      "best_run_s": 0.361084583
+    },
+    {
+      "config": {
+        "ef_search": 50
+      },
+      "recall_at_1": 0.809,
+      "recall_at_10": 0.7584999999999995,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 1457.0499018551584,
+      "latency_p50_us": 681,
+      "latency_p99_us": 783,
+      "run_times_s": [
+        0.688390292,
+        0.686793083,
+        0.686318292
+      ],
+      "best_run_s": 0.686318292
+    },
+    {
+      "config": {
+        "ef_search": 100
+      },
+      "recall_at_1": 0.91,
+      "recall_at_10": 0.8936999999999924,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 904.8032046334379,
+      "latency_p50_us": 1099,
+      "latency_p99_us": 1238,
+      "run_times_s": [
+        1.113534625,
+        1.105212708,
+        1.155305875
+      ],
+      "best_run_s": 1.105212708
+    },
+    {
+      "config": {
+        "ef_search": 200
+      },
+      "recall_at_1": 0.946,
+      "recall_at_10": 0.965399999999995,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 587.0005932715206,
+      "latency_p50_us": 1684,
+      "latency_p99_us": 1947,
+      "run_times_s": [
+        1.710463792,
+        1.703575791,
+        1.717103791
+      ],
+      "best_run_s": 1.703575791
+    },
+    {
+      "config": {
+        "ef_search": 500
+      },
+      "recall_at_1": 0.963,
+      "recall_at_10": 0.9918999999999989,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 385.92640868727386,
+      "latency_p50_us": 2557,
+      "latency_p99_us": 2919,
+      "run_times_s": [
+        2.600371375,
+        2.618249583,
+        2.591167584
+      ],
+      "best_run_s": 2.591167584
+    }
+  ],
+  "filtered": [
+    {
+      "cardinality": 10,
+      "selectivity": 0.1,
+      "recall_at_10": 0.9935190476190473,
+      "qps": 316.1917111449594,
+      "unfiltered_recall_at_10": 0.8936999999999924,
+      "unfiltered_qps": 904.8032046334379
+    },
+    {
+      "cardinality": 100,
+      "selectivity": 0.01,
+      "recall_at_10": 0.5836333333333333,
+      "qps": 209.09597640643972,
+      "unfiltered_recall_at_10": 0.8936999999999924,
+      "unfiltered_qps": 904.8032046334379
+    },
+    {
+      "cardinality": 1000,
+      "selectivity": 0.001,
+      "recall_at_10": 0.207,
+      "qps": 210.29295334496916,
+      "unfiltered_recall_at_10": 0.8936999999999924,
+      "unfiltered_qps": 904.8032046334379
+    }
+  ],
+  "incremental": null,
+  "pareto_frontier": [
+    {
+      "recall_at_10": 0.9918999999999989,
+      "qps": 385.92640868727386
+    },
+    {
+      "recall_at_10": 0.965399999999995,
+      "qps": 587.0005932715206
+    },
+    {
+      "recall_at_10": 0.8936999999999924,
+      "qps": 904.8032046334379
+    },
+    {
+      "recall_at_10": 0.7584999999999995,
+      "qps": 1457.0499018551584
+    },
+    {
+      "recall_at_10": 0.5307999999999998,
+      "qps": 2769.4342186855424
+    },
+    {
+      "recall_at_10": 0.3819999999999997,
+      "qps": 4387.60785974134
+    }
+  ],
+  "tier_classification": {
+    "recall_at_10": "excellent",
+    "qps_at_0_95_recall": "acceptable",
+    "build_time": "good",
+    "memory_per_vector": "acceptable",
+    "disk_per_vector": "acceptable",
+    "latency_p99": "good"
+  }
+}
