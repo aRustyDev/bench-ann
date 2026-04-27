@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "harness_version": "0.1.0",
+  "timestamp": "2026-04-27T05:13:21Z",
+  "hardware": {
+    "cpu": "Apple M5",
+    "cores_used": 1,
+    "ram_gb": 32,
+    "os": "macOS 26.4",
+    "storage": "NVMe SSD"
+  },
+  "crate_name": "usearch",
+  "crate_version": "2.25.1",
+  "dataset": {
+    "name": "synthetic-768",
+    "source": "synthetic",
+    "n_vectors": 100000,
+    "n_queries": 1000,
+    "dimension": 768,
+    "metric": "euclidean"
+  },
+  "build": {
+    "config": {
+      "M": 16,
+      "ef_construction": 200
+    },
+    "time_s": 262.047574,
+    "memory_per_vector_bytes": 280,
+    "rss_before_bytes": 318963712,
+    "rss_after_bytes": 654213120
+  },
+  "index_size": {
+    "disk_bytes": 322070672,
+    "disk_per_vector_bytes": 3220.70672
+  },
+  "query_sweeps": [
+    {
+      "config": {
+        "ef_search": 10
+      },
+      "recall_at_1": 0.168,
+      "recall_at_10": 0.12679999999999947,
+      "recall_at_100": 0.07726999999999996,
+      "qps": 6146.615237855017,
+      "latency_p50_us": 159,
+      "latency_p99_us": 236,
+      "run_times_s": [
+        0.163077166,
+        0.162691166,
+        0.162905458
+      ],
+      "best_run_s": 0.162691166
+    },
+    {
+      "config": {
+        "ef_search": 20
+      },
+      "recall_at_1": 0.247,
+      "recall_at_10": 0.1965999999999991,
+      "recall_at_100": 0.09684999999999894,
+      "qps": 3745.559176083805,
+      "latency_p50_us": 262,
+      "latency_p99_us": 373,
+      "run_times_s": [
+        0.267200083,
+        0.266982833,
+        0.268396958
+      ],
+      "best_run_s": 0.266982833
+    },
+    {
+      "config": {
+        "ef_search": 50
+      },
+      "recall_at_1": 0.388,
+      "recall_at_10": 0.32629999999999965,
+      "recall_at_100": 0.0999699999999986,
+      "qps": 1882.967009947244,
+      "latency_p50_us": 522,
+      "latency_p99_us": 664,
+      "run_times_s": [
+        0.532468208,
+        0.53107675,
+        0.5328815
+      ],
+      "best_run_s": 0.53107675
+    },
+    {
+      "config": {
+        "ef_search": 100
+      },
+      "recall_at_1": 0.516,
+      "recall_at_10": 0.4564999999999996,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 1079.8112813823527,
+      "latency_p50_us": 919,
+      "latency_p99_us": 1057,
+      "run_times_s": [
+        0.926778292,
+        0.92608775,
+        0.932559708
+      ],
+      "best_run_s": 0.92608775
+    },
+    {
+      "config": {
+        "ef_search": 200
+      },
+      "recall_at_1": 0.656,
+      "recall_at_10": 0.5973000000000007,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 604.1371917822163,
+      "latency_p50_us": 1652,
+      "latency_p99_us": 1783,
+      "run_times_s": [
+        1.658795709,
+        1.6552531670000001,
+        1.658593
+      ],
+      "best_run_s": 1.6552531670000001
+    },
+    {
+      "config": {
+        "ef_search": 500
+      },
+      "recall_at_1": 0.803,
+      "recall_at_10": 0.7610999999999988,
+      "recall_at_100": 0.09999999999999859,
+      "qps": 282.16714241222576,
+      "latency_p50_us": 3536,
+      "latency_p99_us": 3781,
+      "run_times_s": [
+        3.54399875,
+        3.544778875,
+        3.546706208
+      ],
+      "best_run_s": 3.54399875
+    }
+  ],
+  "filtered": [
+    {
+      "cardinality": 10,
+      "selectivity": 0.1,
+      "recall_at_10": 0.7823999999999982,
+      "qps": 173.15071607282917,
+      "unfiltered_recall_at_10": 0.4564999999999996,
+      "unfiltered_qps": 1079.8112813823527
+    },
+    {
+      "cardinality": 100,
+      "selectivity": 0.01,
+      "recall_at_10": 0.5840833333333334,
+      "qps": 41.452278576970045,
+      "unfiltered_recall_at_10": 0.4564999999999996,
+      "unfiltered_qps": 1079.8112813823527
+    },
+    {
+      "cardinality": 1000,
+      "selectivity": 0.001,
+      "recall_at_10": 0.1245,
+      "qps": 17.375707119876484,
+      "unfiltered_recall_at_10": 0.4564999999999996,
+      "unfiltered_qps": 1079.8112813823527
+    }
+  ],
+  "incremental": null,
+  "pareto_frontier": [
+    {
+      "recall_at_10": 0.7610999999999988,
+      "qps": 282.16714241222576
+    },
+    {
+      "recall_at_10": 0.5973000000000007,
+      "qps": 604.1371917822163
+    },
+    {
+      "recall_at_10": 0.4564999999999996,
+      "qps": 1079.8112813823527
+    },
+    {
+      "recall_at_10": 0.32629999999999965,
+      "qps": 1882.967009947244
+    },
+    {
+      "recall_at_10": 0.1965999999999991,
+      "qps": 3745.559176083805
+    },
+    {
+      "recall_at_10": 0.12679999999999947,
+      "qps": 6146.615237855017
+    }
+  ],
+  "tier_classification": {
+    "recall_at_10": "unacceptable",
+    "qps_at_0_95_recall": "unacceptable",
+    "build_time": "acceptable",
+    "memory_per_vector": "good",
+    "disk_per_vector": "acceptable",
+    "latency_p99": "unacceptable"
+  }
+}
