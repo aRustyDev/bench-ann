@@ -48,28 +48,93 @@ run adapter dataset n_vectors="10000" n_queries="1000" m="16" output_dir="result
 # ─── Sweep Recipes ────────────────────────────────────────────
 # Each sweep runs all 3 Cohort A adapters across 4 dimensionalities.
 # Ground truth is cached and shared across adapters.
+# Sweeps skip runs whose output JSON already exists (resumable).
 
 adapters := "hnsw-rs usearch instant-distance"
 dims := "128 384 768 1536"
 
-# Quick validation sweep: 10K vectors, 1K queries (~5 min total)
-sweep-10k:
-    @echo "═══ 10K Sweep: 3 adapters × 4 dims ═══"
-    @just _sweep 10000 1000 results/10k ground_truth/10k
-    @echo "═══ 10K Sweep Complete ═══"
+# Quick validation: 10K vectors, 1K queries
+# ~5 min, ~0.6 GB peak RAM, 12 runs
+sweep-10k confirm="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "{{confirm}}" != "yes" ]; then
+        echo ""
+        echo "  sweep-10k: Quick validation sweep"
+        echo "  ─────────────────────────────────"
+        echo "  Vectors:    10,000"
+        echo "  Queries:    1,000"
+        echo "  Adapters:   hnsw-rs, usearch, instant-distance"
+        echo "  Dimensions: 128, 384, 768, 1536"
+        echo "  Runs:       12 (3 adapters × 4 dims)"
+        echo "  Est. time:  ~5 minutes"
+        echo "  Peak RAM:   ~0.6 GB"
+        echo "  Disk:       ~5 MB results"
+        echo ""
+        echo "  Run with: just sweep-10k confirm=yes"
+        echo ""
+        exit 0
+    fi
+    echo "═══ 10K Sweep: 3 adapters × 4 dims ═══"
+    just _sweep 10000 1000 results/10k ground_truth/10k
+    echo "═══ 10K Sweep Complete ═══"
 
-# Research-grade sweep: 100K vectors, 1K queries (~1-2 hr total)
-sweep-100k:
-    @echo "═══ 100K Sweep: 3 adapters × 4 dims ═══"
-    @just _sweep 100000 1000 results/100k ground_truth/100k
-    @echo "═══ 100K Sweep Complete ═══"
+# Research-grade: 100K vectors, 1K queries
+# ~1-2 hours, ~9 GB peak RAM, 12 runs
+sweep-100k confirm="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "{{confirm}}" != "yes" ]; then
+        echo ""
+        echo "  sweep-100k: Research-grade sweep"
+        echo "  ────────────────────────────────"
+        echo "  Vectors:    100,000"
+        echo "  Queries:    1,000"
+        echo "  Adapters:   hnsw-rs, usearch, instant-distance"
+        echo "  Dimensions: 128, 384, 768, 1536"
+        echo "  Runs:       12 (3 adapters × 4 dims)"
+        echo "  Est. time:  ~1-2 hours"
+        echo "  Peak RAM:   ~9 GB (at 1536d)"
+        echo "  Disk:       ~50 MB results + ground truth"
+        echo ""
+        echo "  Run with: just sweep-100k confirm=yes"
+        echo ""
+        exit 0
+    fi
+    echo "═══ 100K Sweep: 3 adapters × 4 dims ═══"
+    just _sweep 100000 1000 results/100k ground_truth/100k
+    echo "═══ 100K Sweep Complete ═══"
 
-# Publication-grade sweep: 1M vectors, 1K queries (~6-12 hr total)
+# Publication-grade: 1M vectors, 1K queries
+# ~6-12 hours, ~15 GB peak RAM, 12 runs
 # Uses 1K queries (not 10K) to stay within 32GB RAM at 1536d.
-sweep-1m:
-    @echo "═══ 1M Sweep: 3 adapters × 4 dims ═══"
-    @just _sweep 1000000 1000 results/1m ground_truth/1m
-    @echo "═══ 1M Sweep Complete ═══"
+sweep-1m confirm="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "{{confirm}}" != "yes" ]; then
+        echo ""
+        echo "  sweep-1m: Publication-grade sweep"
+        echo "  ──────────────────────────────────"
+        echo "  Vectors:    1,000,000"
+        echo "  Queries:    1,000"
+        echo "  Adapters:   hnsw-rs, usearch, instant-distance"
+        echo "  Dimensions: 128, 384, 768, 1536"
+        echo "  Runs:       12 (3 adapters × 4 dims)"
+        echo "  Est. time:  ~6-12 hours (overnight recommended)"
+        echo "  Peak RAM:   ~15 GB (at 1536d)"
+        echo "  Disk:       ~500 MB results + ground truth"
+        echo "  Min RAM:    32 GB required"
+        echo ""
+        echo "  Recommended: nohup just sweep-1m confirm=yes > sweep-1m.log 2>&1 &"
+        echo "  Monitor:     grep -c Done sweep-1m.log  # out of 12"
+        echo ""
+        echo "  Run with: just sweep-1m confirm=yes"
+        echo ""
+        exit 0
+    fi
+    echo "═══ 1M Sweep: 3 adapters × 4 dims ═══"
+    just _sweep 1000000 1000 results/1m ground_truth/1m
+    echo "═══ 1M Sweep Complete ═══"
 
 # Internal: run a sweep with skip-if-exists checkpointing.
 # Skips runs whose output JSON already exists. Commits after each dimension.
@@ -97,11 +162,26 @@ _sweep n_vectors n_queries output_dir gt_dir:
     done
 
 # Fair M=32 comparison (instant-distance's hardcoded M)
-sweep-m32 n_vectors="10000" n_queries="1000" output_dir="results/m32":
-    @echo "═══ M=32 Sweep: hnsw-rs + usearch × 4 dims ═══"
-    @for dim in {{dims}}; do \
-        for adapter in hnsw-rs usearch; do \
-            echo "--- $adapter M=32 @ ${dim}d ---"; \
+sweep-m32 n_vectors="10000" n_queries="1000" output_dir="results/m32" confirm="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "{{confirm}}" != "yes" ]; then
+        echo ""
+        echo "  sweep-m32: Fair M=32 comparison"
+        echo "  ───────────────────────────────"
+        echo "  Only hnsw-rs + usearch (instant-distance is always M=32)"
+        echo "  Vectors:    {{n_vectors}}"
+        echo "  Queries:    {{n_queries}}"
+        echo "  Runs:       8 (2 adapters × 4 dims)"
+        echo ""
+        echo "  Run with: just sweep-m32 confirm=yes"
+        echo ""
+        exit 0
+    fi
+    echo "═══ M=32 Sweep: hnsw-rs + usearch × 4 dims ═══"
+    for dim in {{dims}}; do
+        for adapter in hnsw-rs usearch; do
+            echo "--- $adapter M=32 @ ${dim}d ---"
             cargo run --release -p ann-bench-cli -- run \
                 --adapter "$adapter" \
                 --dataset "synthetic-$dim" \
@@ -110,10 +190,29 @@ sweep-m32 n_vectors="10000" n_queries="1000" output_dir="results/m32":
                 --runs 3 \
                 -M 32 \
                 --output-dir {{output_dir}} \
-                --gt-dir ground_truth; \
-        done; \
+                --gt-dir ground_truth
+        done
     done
-    @echo "═══ M=32 Sweep Complete ═══"
+    echo "═══ M=32 Sweep Complete ═══"
+
+# Remove all results and ground truth (fresh start)
+clean confirm="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "{{confirm}}" != "yes" ]; then
+        echo ""
+        echo "  clean: Remove ALL results and ground truth caches"
+        echo "  ──────────────────────────────────────────────────"
+        echo "  This deletes:"
+        echo "    results/     — all benchmark JSON files"
+        echo "    ground_truth/ — all cached brute-force results"
+        echo ""
+        echo "  Run with: just clean confirm=yes"
+        echo ""
+        exit 0
+    fi
+    rm -rf results ground_truth
+    echo "Cleaned all results and ground truth caches."
 
 # ─── Analysis ─────────────────────────────────────────────────
 
