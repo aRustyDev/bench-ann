@@ -48,7 +48,7 @@ impl QueryConfig for HnswQueryConfig {
 
 /// Default parameter sweep for hnsw_rs benchmarks.
 pub fn default_sweep() -> Vec<HnswQueryConfig> {
-    [10, 20, 50, 100, 200, 500]
+    [10, 20, 50, 100, 200, 500, 1000, 2000]
         .iter()
         .map(|&ef| HnswQueryConfig { ef_search: ef })
         .collect()
@@ -243,9 +243,11 @@ fn query_inner<D: Distance<f32> + Default + Send + Sync>(
     config: &HnswQueryConfig,
 ) -> anyhow::Result<Vec<QueryResult>> {
     let neighbours = hnsw.search(vector, k, config.ef_search);
+    // hnsw_rs DistL2 returns L2 (with sqrt), but ground truth uses squared L2.
+    // Square the distances to match ground truth's distance space.
     Ok(neighbours
         .iter()
-        .map(|n| (n.d_id, n.distance))
+        .map(|n| (n.d_id, n.distance * n.distance))
         .collect())
 }
 
@@ -267,9 +269,10 @@ fn filtered_query_inner<D: Distance<f32> + Default + Send + Sync>(
 
     let wrapper = ClosureFilter(filter);
     let neighbours = hnsw.search_filter(vector, k, config.ef_search, Some(&wrapper));
+    // Square distances to match ground truth's squared L2 space (see query_inner).
     Ok(neighbours
         .iter()
-        .map(|n| (n.d_id, n.distance))
+        .map(|n| (n.d_id, n.distance * n.distance))
         .collect())
 }
 

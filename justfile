@@ -55,56 +55,46 @@ dims := "128 384 768 1536"
 # Quick validation sweep: 10K vectors, 1K queries (~5 min total)
 sweep-10k:
     @echo "═══ 10K Sweep: 3 adapters × 4 dims ═══"
-    @for dim in {{dims}}; do \
-        for adapter in {{adapters}}; do \
-            echo "--- $adapter @ ${dim}d (10K) ---"; \
-            cargo run --release -p ann-bench-cli -- run \
-                --adapter "$adapter" \
-                --dataset "synthetic-$dim" \
-                --n-vectors 10000 \
-                --n-queries 1000 \
-                --runs 3 \
-                --output-dir results/10k \
-                --gt-dir ground_truth/10k; \
-        done; \
-    done
+    @just _sweep 10000 1000 results/10k ground_truth/10k
     @echo "═══ 10K Sweep Complete ═══"
 
 # Research-grade sweep: 100K vectors, 1K queries (~1-2 hr total)
 sweep-100k:
     @echo "═══ 100K Sweep: 3 adapters × 4 dims ═══"
-    @for dim in {{dims}}; do \
-        for adapter in {{adapters}}; do \
-            echo "--- $adapter @ ${dim}d (100K) ---"; \
-            cargo run --release -p ann-bench-cli -- run \
-                --adapter "$adapter" \
-                --dataset "synthetic-$dim" \
-                --n-vectors 100000 \
-                --n-queries 1000 \
-                --runs 3 \
-                --output-dir results/100k \
-                --gt-dir ground_truth/100k; \
-        done; \
-    done
+    @just _sweep 100000 1000 results/100k ground_truth/100k
     @echo "═══ 100K Sweep Complete ═══"
 
-# Publication-grade sweep: 1M vectors, 10K queries (~6-12 hr total)
+# Publication-grade sweep: 1M vectors, 1K queries (~6-12 hr total)
+# Uses 1K queries (not 10K) to stay within 32GB RAM at 1536d.
 sweep-1m:
     @echo "═══ 1M Sweep: 3 adapters × 4 dims ═══"
+    @just _sweep 1000000 1000 results/1m ground_truth/1m
+    @echo "═══ 1M Sweep Complete ═══"
+
+# Internal: run a sweep with skip-if-exists checkpointing.
+# Skips runs whose output JSON already exists. Commits after each dimension.
+_sweep n_vectors n_queries output_dir gt_dir:
     @for dim in {{dims}}; do \
         for adapter in {{adapters}}; do \
-            echo "--- $adapter @ ${dim}d (1M) ---"; \
-            cargo run --release -p ann-bench-cli -- run \
-                --adapter "$adapter" \
-                --dataset "synthetic-$dim" \
-                --n-vectors 1000000 \
-                --n-queries 10000 \
-                --runs 3 \
-                --output-dir results/1m \
-                --gt-dir ground_truth/1m; \
+            outfile="{{output_dir}}/$( \
+                echo "$adapter" | sed 's/-/_/g; s/instant_distance/instant-distance/' \
+            )_synthetic-${dim}_M=*.json"; \
+            if ls $outfile 1>/dev/null 2>&1; then \
+                echo "--- SKIP $adapter @ ${dim}d (exists) ---"; \
+            else \
+                echo "--- $adapter @ ${dim}d ({{n_vectors}} vecs) ---"; \
+                cargo run --release -p ann-bench-cli -- run \
+                    --adapter "$adapter" \
+                    --dataset "synthetic-$dim" \
+                    --n-vectors {{n_vectors}} \
+                    --n-queries {{n_queries}} \
+                    --runs 3 \
+                    --output-dir {{output_dir}} \
+                    --gt-dir {{gt_dir}}; \
+            fi; \
         done; \
+        echo "=== Checkpoint: ${dim}d complete ==="; \
     done
-    @echo "═══ 1M Sweep Complete ═══"
 
 # Fair M=32 comparison (instant-distance's hardcoded M)
 sweep-m32 n_vectors="10000" n_queries="1000" output_dir="results/m32":

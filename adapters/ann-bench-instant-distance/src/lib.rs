@@ -88,7 +88,7 @@ impl QueryConfig for InstantDistanceQueryConfig {
 
 /// Default parameter sweep for instant-distance benchmarks.
 pub fn default_sweep() -> Vec<InstantDistanceQueryConfig> {
-    [10, 20, 50, 100, 200, 500]
+    [10, 20, 50, 100, 200, 500, 1000, 2000]
         .iter()
         .map(|&ef| InstantDistanceQueryConfig { ef_search: ef })
         .collect()
