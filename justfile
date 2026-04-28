@@ -71,7 +71,7 @@ sweep-10k confirm="":
         echo "  Peak RAM:   ~0.6 GB"
         echo "  Disk:       ~5 MB results"
         echo ""
-        echo "  Run with: just sweep-10k confirm=yes"
+        echo "  Run with: just sweep-10k yes"
         echo ""
         exit 0
     fi
@@ -97,7 +97,7 @@ sweep-100k confirm="":
         echo "  Peak RAM:   ~9 GB (at 1536d)"
         echo "  Disk:       ~50 MB results + ground truth"
         echo ""
-        echo "  Run with: just sweep-100k confirm=yes"
+        echo "  Run with: just sweep-100k yes"
         echo ""
         exit 0
     fi
@@ -125,10 +125,10 @@ sweep-1m confirm="":
         echo "  Disk:       ~500 MB results + ground truth"
         echo "  Min RAM:    32 GB required"
         echo ""
-        echo "  Recommended: nohup just sweep-1m confirm=yes > sweep-1m.log 2>&1 &"
+        echo "  Recommended: nohup just sweep-1m yes > sweep-1m.log 2>&1 &"
         echo "  Monitor:     grep -c Done sweep-1m.log  # out of 12"
         echo ""
-        echo "  Run with: just sweep-1m confirm=yes"
+        echo "  Run with: just sweep-1m yes"
         echo ""
         exit 0
     fi
@@ -174,7 +174,7 @@ sweep-m32 n_vectors="10000" n_queries="1000" output_dir="results/m32" confirm=""
         echo "  Queries:    {{n_queries}}"
         echo "  Runs:       8 (2 adapters × 4 dims)"
         echo ""
-        echo "  Run with: just sweep-m32 confirm=yes"
+        echo "  Run with: just sweep-m32 yes"
         echo ""
         exit 0
     fi
@@ -207,7 +207,7 @@ clean confirm="":
         echo "    results/     — all benchmark JSON files"
         echo "    ground_truth/ — all cached brute-force results"
         echo ""
-        echo "  Run with: just clean confirm=yes"
+        echo "  Run with: just clean yes"
         echo ""
         exit 0
     fi
