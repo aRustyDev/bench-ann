@@ -136,6 +136,30 @@ sweep-1m confirm="":
     just _sweep 1000000 1000 results/1m ground_truth/1m
     echo "═══ 1M Sweep Complete ═══"
 
+# Pre-compute ground truth for all dimensions at a given scale.
+# Runs sequentially (one dim at a time) to manage peak memory.
+# GT is cached — subsequent benchmark runs skip computation.
+precompute-gt n_vectors="1000000" n_queries="1000" gt_dir="ground_truth/1m":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "═══ Pre-computing ground truth ({{n_vectors}} vectors, {{n_queries}} queries) ═══"
+    for dim in {{dims}}; do
+        cache="{{gt_dir}}/synthetic-${dim}_euclidean_k100"
+        if [ -d "$cache" ]; then
+            echo "--- SKIP ${dim}d GT (cached at $cache) ---"
+        else
+            echo "--- Computing GT: ${dim}d ({{n_vectors}} vectors, {{n_queries}} queries) ---"
+            cargo run --release -p ann-bench-cli -- ground-truth \
+                --dataset "synthetic-$dim" \
+                --n-vectors {{n_vectors}} \
+                --n-queries {{n_queries}} \
+                --metric euclidean \
+                --k 100 \
+                --output-dir {{gt_dir}}
+        fi
+    done
+    echo "═══ Ground truth pre-computation complete ═══"
+
 # Internal: run a sweep with skip-if-exists checkpointing.
 # Skips runs whose output JSON already exists. Commits after each dimension.
 _sweep n_vectors n_queries output_dir gt_dir:
